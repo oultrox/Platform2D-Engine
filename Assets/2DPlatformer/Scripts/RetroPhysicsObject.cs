@@ -44,6 +44,14 @@ public class RetroPhysicsObject : MonoBehaviour {
         contactFilter.useLayerMask = true;
 	}
 
+    //método que será llamado por playermovement por override.
+    private void Update()
+    {
+        targetVelocity = Vector2.zero;
+        ComputeVelocity();
+    }
+    protected virtual void ComputeVelocity() { }
+
     Vector2 moveAlongGround;
     //Otorga gravedad al vector de velocidad, deltaPosition guarda la posicion del ultimo frame, y luego aplica la gravedad a traves de la función Movement.
 	void FixedUpdate ()
