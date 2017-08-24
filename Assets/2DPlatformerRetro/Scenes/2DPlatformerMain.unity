@@ -503,11 +503,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb244435cae305d47b3b3c21a4a74c80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  horizontalRayCount: 4
-  verticalRayCount: 4
   collisionMask:
     serializedVersion: 2
     m_Bits: 256
+  horizontalRayCount: 4
+  verticalRayCount: 4
 --- !u!61 &995540348
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -548,6 +548,7 @@ GameObject:
   - component: {fileID: 1221783748}
   - component: {fileID: 1221783747}
   - component: {fileID: 1221783746}
+  - component: {fileID: 1221783749}
   m_Layer: 8
   m_Name: New Sprite (1)
   m_TagString: Untagged
@@ -628,12 +629,29 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1221783745}
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -5.93, y: 4.66, z: -0.015625}
-  m_LocalScale: {x: 1, y: 1.8873128, z: 1}
+  m_LocalPosition: {x: -9.12, y: 5.37, z: -0.015625}
+  m_LocalScale: {x: 0.5000001, y: 1.8873128, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &1221783749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1221783745}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9df8b598b188e444c8f8ca0321a4cb17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 256
+  horizontalRayCount: 2
+  verticalRayCount: 4
+  move: {x: 0, y: 0, z: 0}
 --- !u!1001 &1513999302
 Prefab:
   m_ObjectHideFlags: 0
@@ -919,7 +937,7 @@ Prefab:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}
       propertyPath: orthographic size
-      value: 3.25
+      value: 3.171875
       objectReference: {fileID: 0}
     - target: {fileID: 114123390247084860, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}

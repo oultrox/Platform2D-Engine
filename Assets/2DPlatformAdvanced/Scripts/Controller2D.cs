@@ -3,29 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D))]
-public class Controller2D : MonoBehaviour {
 
-    const float SKIN_WIDTH = 0.015f;
-    public int horizontalRayCount = 2;
-    public int verticalRayCount = 4;
-    public LayerMask collisionMask;
-    public CollisionInfo collisions;
+public class Controller2D : RaycastController {
+    
     float maxClimbAngle = 80;
     float maxDescendAngle = 75;
 
-    private float horizontalRaySpacing;
-    private float verticalRaySpacing;
+    public CollisionInfo collisions;
 
-    BoxCollider2D coll;
-    RaycastOrigins raycastOrigins;
-
-    //Nos facilita los limites de el origen del raycast via el collider.
-    struct RaycastOrigins
-    {
-        public Vector2 topLeft, topRight;
-        public Vector2 bottomLeft, bottomRight;
-    }
 
     //Nos permite conocer la informacion sobre donde está colisionando.
     public struct CollisionInfo
@@ -35,7 +20,8 @@ public class Controller2D : MonoBehaviour {
         public bool climbingSlope;
         public bool descendingSlope;
         public float slopeAngle, slopeAngleOld;
-        
+        public Vector3 velocityOld;
+
         public void Reset()
         {
             above = below = false;
@@ -47,11 +33,9 @@ public class Controller2D : MonoBehaviour {
         }
     }
 
-    // Use this for initialization
-    void Start ()
+    public override void Start()
     {
-        coll = this.GetComponent<BoxCollider2D>();
-        CalculateRaySpacing();
+        base.Start();
     }
 
     //Chequea la colisión separadamente como en los clásicos donde utiliza los raycastr para saber si colisióno con un sólido.
@@ -99,6 +83,11 @@ public class Controller2D : MonoBehaviour {
                 float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
                 if (i==0 && slopeAngle <= maxClimbAngle)
                 {
+                    if (collisions.descendingSlope)
+                    {
+                        collisions.descendingSlope = false;
+                        velocity = collisions.velocityOld;
+                    }
                     float distanceToSlopeStart = 0;
                     if (slopeAngle!= collisions.slopeAngleOld)
                     {
@@ -186,36 +175,11 @@ public class Controller2D : MonoBehaviour {
         }
     }
 
-    //Lanza las lineas del raycast del origen en base al grosor del collider del jugador.
-    void UpdateRaycastOrigins()
-    {
-        Bounds bounds = coll.bounds;
-        bounds.Expand(SKIN_WIDTH * -2);
-
-        raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        raycastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
-
-    }
-
-    //calcula el espacio entre las lineas del raycasting.
-    void CalculateRaySpacing()
-    {
-        Bounds bounds = coll.bounds;
-        bounds.Expand(SKIN_WIDTH * -2);
-
-        horizontalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
-        verticalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
-
-        horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-        verticalRaySpacing = bounds.size.y / (verticalRayCount - 1);
-    }
-
     public void Move(Vector3 velocity)
     {
         UpdateRaycastOrigins();
         collisions.Reset();
+        collisions.velocityOld = velocity;
 
         if (velocity.y < 0)
         {
