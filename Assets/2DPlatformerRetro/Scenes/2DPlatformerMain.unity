@@ -119,7 +119,7 @@ GameObject:
   - component: {fileID: 116174042}
   - component: {fileID: 116174041}
   m_Layer: 8
-  m_Name: Slope2 (2)
+  m_Name: Wall2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -374,7 +374,7 @@ GameObject:
   - component: {fileID: 772132149}
   - component: {fileID: 772132148}
   m_Layer: 8
-  m_Name: Slope2 (1)
+  m_Name: Wall1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -619,11 +619,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b11b79df591d5b04093e78e772a7bb31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 3.5
+  maxJumpHeight: 3
+  minJumpHeight: 0.5
   timeToJumpApex: 0.4
   moveSpeed: 7
   accelerationTimeAirborne: 0.03
-  accelerationTimeGrounded: 1
+  accelerationTimeGrounded: 0.03
+  wallsSlideSpeedMax: 2
+  wallStickTime: 0.3
+  wallJumpClimb: {x: 5, y: 12}
+  wallJumpOff: {x: 20, y: -3}
+  wallLeap: {x: 15, y: 15}
 --- !u!114 &995540347
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -663,7 +669,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.6, y: 0.6}
+  m_Size: {x: 0.4, y: 0.4}
   m_EdgeRadius: 0
 --- !u!212 &995540350 stripped
 SpriteRenderer:
@@ -1033,7 +1039,7 @@ Prefab:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}
       propertyPath: orthographic size
-      value: 3.171875
+      value: 2.96875
       objectReference: {fileID: 0}
     - target: {fileID: 114123390247084860, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}
