@@ -16,6 +16,8 @@ public class PlayerMove : MonoBehaviour {
     private Controller2D controller;
     private float targetVelocityX;
     private float velocityXSmoothing;
+    private float h;
+
 	// Use this for initialization
 	void Start () {
         controller = this.GetComponent<Controller2D>();
@@ -23,13 +25,13 @@ public class PlayerMove : MonoBehaviour {
         jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
 	}
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
         }
-        float h = Input.GetAxisRaw("Horizontal");
+        h = Input.GetAxisRaw("Horizontal");
 
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
         {

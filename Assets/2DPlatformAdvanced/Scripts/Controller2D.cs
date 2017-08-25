@@ -5,12 +5,6 @@ using UnityEngine;
 
 
 public class Controller2D : RaycastController {
-    
-    float maxClimbAngle = 80;
-    float maxDescendAngle = 75;
-
-    public CollisionInfo collisions;
-
 
     //Nos permite conocer la informacion sobre donde está colisionando.
     public struct CollisionInfo
@@ -33,9 +27,43 @@ public class Controller2D : RaycastController {
         }
     }
 
+    float maxClimbAngle = 80;
+    float maxDescendAngle = 75;
+
+    public CollisionInfo collisions;
+
+    //----Metodos API-----
     public override void Start()
     {
         base.Start();
+    }
+
+    //-----Metodos custom------
+    //Funcion de movimiento de el player.
+    public void Move(Vector3 velocity, bool standingOnPlatform = false)
+    {
+        UpdateRaycastOrigins();
+        collisions.Reset();
+        collisions.velocityOld = velocity;
+
+        if (velocity.y < 0)
+        {
+            DescendSlope(ref velocity);
+        }
+        if (velocity.x != 0)
+        {
+            HorizontalCollisions(ref velocity);
+        }
+
+        if (velocity.y != 0)
+        {
+            VerticalCollisions(ref velocity);
+        }
+        transform.Translate(velocity);
+        if (standingOnPlatform)
+        {
+            collisions.below = true; 
+        }
     }
 
     //Chequea la colisión separadamente como en los clásicos donde utiliza los raycastr para saber si colisióno con un sólido.
@@ -175,27 +203,5 @@ public class Controller2D : RaycastController {
                 }
             }
         }
-    }
-
-    public void Move(Vector3 velocity)
-    {
-        UpdateRaycastOrigins();
-        collisions.Reset();
-        collisions.velocityOld = velocity;
-
-        if (velocity.y < 0)
-        {
-            DescendSlope(ref velocity);
-        }
-        if (velocity.x!=0)
-        {
-            HorizontalCollisions(ref velocity);
-        }
-
-        if (velocity.y != 0)
-        {
-            VerticalCollisions(ref velocity);
-        }
-        transform.Translate(velocity);
     }
 }

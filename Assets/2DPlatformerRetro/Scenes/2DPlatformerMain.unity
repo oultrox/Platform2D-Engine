@@ -387,11 +387,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4566797654940672, guid: e7fcecc826687024e9b52ec763b14088, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -7.14
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4566797654940672, guid: e7fcecc826687024e9b52ec763b14088, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -0.4
+      value: 0.49
       objectReference: {fileID: 0}
     - target: {fileID: 4566797654940672, guid: e7fcecc826687024e9b52ec763b14088, type: 2}
       propertyPath: m_LocalPosition.z
@@ -729,8 +729,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1221783745}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -7.16, y: 1.67, z: 20}
-  m_LocalScale: {x: 1, y: 0.40000057, z: 1}
+  m_LocalPosition: {x: -0.03, y: -0.03, z: 20}
+  m_LocalScale: {x: 0.5967559, y: 0.40000057, z: 1}
   m_Children: []
   m_Father: {fileID: 167898329}
   m_RootOrder: 1
@@ -754,7 +754,7 @@ MonoBehaviour:
   passengerMask:
     serializedVersion: 2
     m_Bits: 8192
-  move: {x: 0, y: -1, z: 0}
+  move: {x: 0, y: 1, z: 0}
 --- !u!1001 &1513999302
 Prefab:
   m_ObjectHideFlags: 0
@@ -944,7 +944,7 @@ Prefab:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}
       propertyPath: orthographic size
-      value: 3.203125
+      value: 3.171875
       objectReference: {fileID: 0}
     - target: {fileID: 114123390247084860, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}

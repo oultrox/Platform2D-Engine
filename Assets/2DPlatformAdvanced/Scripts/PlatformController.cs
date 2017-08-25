@@ -3,11 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlatformController : RaycastController {
-    public LayerMask passengerMask;
-    public Vector3 move;
-
-    List<PassengerMovement> passengerMovements;
-
 
     struct PassengerMovement
     {
@@ -24,6 +19,10 @@ public class PlatformController : RaycastController {
             isMovingBeforePlatform = _isMovingBeforePlatform;
         }
     }
+
+    public LayerMask passengerMask;
+    public Vector3 move;
+    List<PassengerMovement> passengerMovements;
 
 	// Use this for initialization
 	public override void Start ()
@@ -48,7 +47,7 @@ public class PlatformController : RaycastController {
         {
             if (passengerMovements[i].isMovingBeforePlatform == beforeMovePlatform)
             {
-                passengerMovements[i].transform.GetComponent<Controller2D>().Move(passengerMovements[i].velocity);
+                passengerMovements[i].transform.GetComponent<Controller2D>().Move(passengerMovements[i].velocity,passengerMovements[i].isStandingOnPlaform);
             }
         }
     }
@@ -77,6 +76,7 @@ public class PlatformController : RaycastController {
                         movedPassangers.Add(hit.transform);
                         float pushX = (directionY == 1) ? velocity.x : 0;
                         float pushY = velocity.y - (hit.distance - SKIN_WIDTH) * directionY;
+
                         passengerMovements.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), directionY == 1, true));
                     }
                 }
@@ -101,6 +101,7 @@ public class PlatformController : RaycastController {
                         movedPassangers.Add(hit.transform);
                         float pushX = velocity.x - (hit.distance - SKIN_WIDTH) * directionX;
                         float pushY = 0;
+
                         passengerMovements.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), false, true));
                     }
                 }
