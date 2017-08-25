@@ -18,9 +18,12 @@ public class PlayerMove : MonoBehaviour {
     private float targetVelocityX;
     private float velocityXSmoothing;
     private float h;
-
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
 	// Use this for initialization
 	void Start () {
+        spriteRenderer = this.GetComponent<SpriteRenderer>();
+        animator = this.GetComponent<Animator>();
         controller = this.GetComponent<Controller2D>();
         gravity = - (2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         jumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
@@ -43,6 +46,14 @@ public class PlayerMove : MonoBehaviour {
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.fixedDeltaTime);
+
+        if (velocity.x !=0)
+        {
+            spriteRenderer.flipX = velocity.x < -0.01f;
+        }
+
+        animator.SetBool("grounded", controller.collisions.below);
+        animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
     }
 
 
