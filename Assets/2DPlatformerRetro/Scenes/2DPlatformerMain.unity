@@ -515,17 +515,17 @@ Prefab:
     - target: {fileID: 212991655389708426, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: m_Color.g
-      value: 0.38235295
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 212991655389708426, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: m_Color.b
-      value: 0.38235295
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 212991655389708426, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: m_Color.a
-      value: 0.834
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 212991655389708426, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
@@ -622,7 +622,7 @@ MonoBehaviour:
   jumpHeight: 3.5
   timeToJumpApex: 0.4
   moveSpeed: 7
-  accelerationTimeAirborne: 0.05
+  accelerationTimeAirborne: 0.03
   accelerationTimeGrounded: 1
 --- !u!114 &995540347
 MonoBehaviour:
