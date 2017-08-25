@@ -90,6 +90,15 @@ public class Controller2D : RaycastController {
 
             if (hit)
             {
+                //Atravesar suelos hacia arriba
+                if (hit.collider.tag == "Atravesable")
+                {
+                    if (directionY == 1 || hit.distance == 0)
+                    {
+                        continue;
+                    }
+                }
+
                 if (collisions.climbingSlope)
                 {
                     velocity.x =velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Math.Abs(velocity.x);

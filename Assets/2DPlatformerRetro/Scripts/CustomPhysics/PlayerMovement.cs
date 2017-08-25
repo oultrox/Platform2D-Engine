@@ -39,7 +39,6 @@ public class PlayerMovement : RetroPhysicsObject
         }
 
         spriteRenderer.flipX = move.x < -0.01f;
-
         animator.SetBool("grounded", isGrounded);
         animator.SetFloat("velocityX", Mathf.Abs(velocity.x) / maxSpeed);
         targetVelocity = move * maxSpeed;
