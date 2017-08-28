@@ -22,6 +22,7 @@ public class PlatformController : RaycastController {
 
     List<PassengerMovement> passengerMovements;
     Dictionary<Transform, Controller2D> dictionaryPassengers = new Dictionary<Transform, Controller2D>();
+
     public LayerMask passengerMask;
     public Vector3[] localWaypoints;
     private Vector3[] globalWayPointsPosition;
@@ -32,6 +33,7 @@ public class PlatformController : RaycastController {
     public bool isCyclic;
     public float waitTime;
     private float nextMoveTime;
+
     [Range(0,2)]
     public float easeAmount;
 	// Use this for initialization

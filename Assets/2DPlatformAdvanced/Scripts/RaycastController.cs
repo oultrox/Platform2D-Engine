@@ -8,21 +8,21 @@ public class RaycastController : MonoBehaviour {
     public LayerMask collisionMask;
 
     protected const float SKIN_WIDTH = 0.015f;
-    public int horizontalRayCount = 2;
-    public int verticalRayCount = 4;
+    const float DISTANCE_BETWEEN_RAYS = 0.1f;
 
-
+    protected int horizontalRayCount;
+    protected int verticalRayCount;
     protected float horizontalRaySpacing;
     protected float verticalRaySpacing;
 
-    protected BoxCollider2D coll;
+    protected BoxCollider2D collider;
     protected RaycastOrigins raycastOrigins;
 
 
     // Use this for initialization
     public virtual void Start()
     {
-        coll = this.GetComponent<BoxCollider2D>();
+        collider = this.GetComponent<BoxCollider2D>();
         CalculateRaySpacing();
     }
 
@@ -36,7 +36,7 @@ public class RaycastController : MonoBehaviour {
     //Lanza las lineas del raycast del origen en base al grosor del collider del jugador.
     public void UpdateRaycastOrigins()
     {
-        Bounds bounds = coll.bounds;
+        Bounds bounds = collider.bounds;
         bounds.Expand(SKIN_WIDTH * -2);
 
         raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
@@ -49,13 +49,16 @@ public class RaycastController : MonoBehaviour {
     //calcula el espacio entre las lineas del raycasting.
     public void CalculateRaySpacing()
     {
-        Bounds bounds = coll.bounds;
+        Bounds bounds = collider.bounds;
         bounds.Expand(SKIN_WIDTH * -2);
 
-        horizontalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
-        verticalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
+        float boundsWidth = bounds.size.x;
+        float boundsHeight = bounds.size.y;
+
+        horizontalRayCount = Mathf.RoundToInt(boundsHeight / DISTANCE_BETWEEN_RAYS);
+        verticalRayCount = Mathf.RoundToInt(boundsWidth / DISTANCE_BETWEEN_RAYS);
 
         horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-        verticalRaySpacing = bounds.size.y / (verticalRayCount - 1);
+        verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
     }
 }
