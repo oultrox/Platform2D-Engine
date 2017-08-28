@@ -52,11 +52,12 @@ public class PlayerMove : MonoBehaviour
         h = Input.GetAxisRaw("Horizontal");
         int wallDirX = (controller.collisionInfo.left) ? -1 : 1;
 
+        //Transición suave de la velocidad del jugador.
         targetVelocityX = h * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionInfo.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
 
-        // WALL SLIDING
-        if (((controller.collisionInfo.left && velocity.x < 0) || (controller.collisionInfo.right && velocity.x > 0)) && !controller.collisionInfo.below && velocity.y < 0)
+        // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
+        if (((controller.collisionInfo.left && velocity.x < 0) || (controller.collisionInfo.right && velocity.x > 0)) && !controller.collisionInfo.below /*&& velocity.y < 0*/) 
         {
             isStickedToWall = true;
         }
@@ -149,7 +150,7 @@ public class PlayerMove : MonoBehaviour
         //Animations
         if (velocity.x != 0)
         {
-            spriteRenderer.flipX = velocity.x < -0.01f;
+            spriteRenderer.flipX = velocity.x < 0;
         }
 
         animator.SetBool("grounded", controller.collisionInfo.below);
