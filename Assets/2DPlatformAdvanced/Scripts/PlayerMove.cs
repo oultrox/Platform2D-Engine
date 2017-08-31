@@ -30,6 +30,7 @@ public class PlayerMove : MonoBehaviour
     private float targetVelocityX;
     private float velocityXSmoothing;
     private float h;
+    private float v;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
@@ -50,6 +51,7 @@ public class PlayerMove : MonoBehaviour
     private void Update()
     {
         h = Input.GetAxisRaw("Horizontal");
+        v = Input.GetAxisRaw("Vertical");
         int wallDirX = (controller.collisionInfo.left) ? -1 : 1;
 
         //Transición suave de la velocidad del jugador.
@@ -97,11 +99,6 @@ public class PlayerMove : MonoBehaviour
             }
         }
 
-        if (controller.collisionInfo.above || controller.collisionInfo.below)
-        {
-            velocity.y = 0;
-        }
-
         //JUMP
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -145,7 +142,13 @@ public class PlayerMove : MonoBehaviour
         //Gravedad
         velocity.y += gravity * Time.deltaTime;
         //Movmiento
-        controller.Move(velocity * Time.fixedDeltaTime);
+        controller.Move(velocity * Time.fixedDeltaTime,v);
+
+        //Deten el movimiento si está en el suelo o tocando algo arriba.
+        if (controller.collisionInfo.above || controller.collisionInfo.below)
+        {
+            velocity.y = 0;
+        }
 
         //Animations
         if (velocity.x != 0)

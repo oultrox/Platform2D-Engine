@@ -17,6 +17,7 @@ public class Controller2D : RaycastController {
         public float slopeAngle, slopeAngleOld;
         public Vector2 velocityOld;
         public int faceDir;
+        public Collider2D fallThroughPlatform;
 
         public void Reset()
         {
@@ -32,6 +33,7 @@ public class Controller2D : RaycastController {
     private float maxClimbAngle = 80;
     private float maxDescendAngle = 75;
     public CollisionInfo collisionInfo;
+    private float playerVerticalInput;
 
     //----Metodos API-----
     public override void Start()
@@ -41,13 +43,18 @@ public class Controller2D : RaycastController {
     }
 
     //-----Metodos custom------
-    //Funcion de movimiento de el player.
     public void Move(Vector2 moveAmount, bool standingOnPlatform = false)
+    {
+        Move(moveAmount,0f, standingOnPlatform);
+    }
+
+    //Funcion de movimiento de el player.
+    public void Move(Vector2 moveAmount, float input, bool standingOnPlatform = false)
     {
         UpdateRaycastOrigins();
         collisionInfo.Reset();
         collisionInfo.velocityOld = moveAmount;
-
+        playerVerticalInput = input;
         if (moveAmount.x != 0)
         {
             collisionInfo.faceDir = (int)Mathf.Sign(moveAmount.x);
@@ -92,19 +99,38 @@ public class Controller2D : RaycastController {
                 //Atravesar suelos hacia arriba
                 if (hit.collider.tag == "Atravesable")
                 {
+
                     if (directionY == 1 || hit.distance == 0)
                     {
                         continue;
                     }
-                }
 
+                    if (playerVerticalInput == -1)
+                    {
+                        if (collisionInfo.fallThroughPlatform.Equals(hit.collider))
+                        {
+                            continue;
+                        }
+                        collisionInfo.fallThroughPlatform = hit.collider;
+                        
+                    }
+                    
+                    
+                }
+                //Almacena la informacion del collider con el que colisiona para preguntar si es el collider con el que se puede bajar.
+                collisionInfo.fallThroughPlatform = hit.collider;
+
+                //Aplica el movimiento vertical
+                velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
+                rayLength = hit.distance;
+
+                //Corrige el movimiento horizontal en las empinadas o rampas.
                 if (collisionInfo.climbingSlope)
                 {
                     velocity.x =velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Abs(velocity.x);
                 }
-                velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
-                rayLength = hit.distance;
-
+                
+                //Condiciona sus estados de si está tocando por abajo o por arriba.
                 collisionInfo.below = directionY == -1;
                 collisionInfo.above = directionY == 1;
             }
