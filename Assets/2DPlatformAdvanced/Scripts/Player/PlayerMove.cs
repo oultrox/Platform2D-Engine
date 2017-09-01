@@ -52,21 +52,25 @@ public class PlayerMove : MonoBehaviour
     {
         h = Input.GetAxisRaw("Horizontal");
         v = Input.GetAxisRaw("Vertical");
-        int wallDirX = (controller.collisionInfo.left) ? -1 : 1;
+        int wallDirX = (controller.collisionState.left) ? -1 : 1;
 
         //Transición suave de la velocidad del jugador.
         targetVelocityX = h * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionInfo.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionState.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
 
-        // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-        if (((controller.collisionInfo.left && velocity.x < 0) || (controller.collisionInfo.right && velocity.x > 0)) && !controller.collisionInfo.below /*&& velocity.y < 0*/) 
+        if (controller.collisionState.isWallJumpable)
         {
-            isStickedToWall = true;
+            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
+            if (((controller.collisionState.left && velocity.x < 0) || (controller.collisionState.right && velocity.x > 0)) && !controller.collisionState.slidingDownMaxSlope/*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            {
+                isStickedToWall = true;
+            }
+
         }
 
         if (isStickedToWall)
         {
-            if (!controller.collisionInfo.left && !controller.collisionInfo.right)
+            if (!controller.collisionState.left && !controller.collisionState.right)
             {
                 isStickedToWall = false;
             }
@@ -123,9 +127,21 @@ public class PlayerMove : MonoBehaviour
                 isStickedToWall = false;
             }
             //Normal Jump
-            if (controller.collisionInfo.below)
+            if (controller.collisionState.below)
             {
-                velocity.y = maxJumpVelocity;
+                if (controller.collisionState.slidingDownMaxSlope)
+                {
+                    if (h != -Mathf.Sign(controller.collisionState.slopeNormal.x)) //not jumping against slope
+                    {
+                        velocity.y = maxJumpVelocity * controller.collisionState.slopeNormal.y;
+                        velocity.x = maxJumpVelocity * controller.collisionState.slopeNormal.x;
+                    }
+                }
+                else
+                {
+                    velocity.y = maxJumpVelocity;
+                }
+                
             }
 
         }
@@ -145,9 +161,17 @@ public class PlayerMove : MonoBehaviour
         controller.Move(velocity * Time.fixedDeltaTime,v);
 
         //Deten el movimiento si está en el suelo o tocando algo arriba.
-        if (controller.collisionInfo.above || controller.collisionInfo.below)
+        if (controller.collisionState.above || controller.collisionState.below)
         {
-            velocity.y = 0;
+            if (controller.collisionState.slidingDownMaxSlope)
+            {
+                velocity.y += controller.collisionState.slopeNormal.y * -gravity * Time.deltaTime;
+            }
+            else
+            {
+                velocity.y = 0;
+            }
+            
         }
 
         //Animations
@@ -156,7 +180,7 @@ public class PlayerMove : MonoBehaviour
             spriteRenderer.flipX = velocity.x < 0;
         }
 
-        animator.SetBool("grounded", controller.collisionInfo.below);
+        animator.SetBool("grounded", controller.collisionState.below);
         animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
     }
 

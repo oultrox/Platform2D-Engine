@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Atravesable
+  - Escalable
   layers:
   - Default
   - TransparentFX
