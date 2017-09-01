@@ -63,7 +63,12 @@ public class PlayerMove : MonoBehaviour
             // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
             if (((controller.collisionState.left && velocity.x < 0) || (controller.collisionState.right && velocity.x > 0)) && !controller.collisionState.slidingDownMaxSlope/*&&!controller.collisionInfo.below && velocity.y < 0*/)
             {
-                isStickedToWall = true;
+                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
+                if (!controller.collisionState.below)
+                {
+                    isStickedToWall = true;
+                }
+                
             }
 
         }
