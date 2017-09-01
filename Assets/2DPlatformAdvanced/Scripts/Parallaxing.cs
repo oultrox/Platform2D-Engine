@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Parallaxing : MonoBehaviour {
 
@@ -11,11 +9,14 @@ public class Parallaxing : MonoBehaviour {
     private Transform cam;                              //Referencia a la Main camera
     private Vector3 previousCamPos;                     //La posición de la camara en el frame anterior.
 
+    //----------Metodos API-------------
+    //Referencias
     private void Awake()
     {
         cam = Camera.main.transform;   
     }
 
+    //Inicialización
     private void Start()
     {
         previousCamPos = cam.position;
@@ -24,26 +25,31 @@ public class Parallaxing : MonoBehaviour {
         // se asigna las escalas correspondientes.
         for (int i = 0; i < backgrounds.Length; i++)
         {
+            //No se multiplica por -1 debido a que el posicionamiento de los fondos está en coordenadas negativas z de por sí.
             parallaxScales[i] = backgrounds[i].position.z;
+
         }
     }
 
-    float parallaxX;
-    float parallaxY;
-    float backgroundTargetPosX;
-    float backgroundTargetPosY;
-    Vector3 backgroundTargetPos;
+    //Cached variables utilizadas en Update()
+    private float parallaxX;
+    private float parallaxY;
+    private float backgroundTargetPosX;
+    private float backgroundTargetPosY;
+    private Vector3 backgroundTargetPos;
 
+    //Ejecuta el algoritmo de perspectiva en base a la camara y las coordenadas z de los fondos.
     private void Update()
     {
         for (int i = 0; i < backgrounds.Length; i++)
         {
             parallaxX = (previousCamPos.x - cam.position.x) * parallaxScales[i];
             parallaxY = (previousCamPos.y - cam.position.y) * parallaxScales[i];
-
-            backgroundTargetPosX = backgrounds[i].position.x + parallaxX;
+            
+            backgroundTargetPosX = backgrounds[i].position.x + parallaxX; 
             backgroundTargetPos.x = backgroundTargetPosX;
             
+            //Asigna el paralaje Y en caso de que esté activo vía el editor.
             if (isParallaxYEnabled)
             {
                 backgroundTargetPosY = backgrounds[i].position.y + parallaxY;
