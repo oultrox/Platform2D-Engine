@@ -8,7 +8,7 @@ using UnityEngine;
 public class RaycastController : MonoBehaviour {
     
     //Nos facilita los limites de el origen del raycast via el collider.
-    public struct RaycastOrigins
+    public struct RaycastOrigin
     {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
@@ -25,7 +25,7 @@ public class RaycastController : MonoBehaviour {
     protected float verticalRaySpacing;
 
     protected BoxCollider2D colliderObj;
-    protected RaycastOrigins raycastOrigins;
+    protected RaycastOrigin raycastOrigen;
 
 
     // Use this for initialization
@@ -41,10 +41,10 @@ public class RaycastController : MonoBehaviour {
         Bounds bounds = colliderObj.bounds;
         bounds.Expand(SKIN_WIDTH * -2); // esto permite que tenga un pequeño del raycast dentro del jugador, para evitar bugs.
 
-        raycastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        raycastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        raycastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        raycastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
+        raycastOrigen.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
+        raycastOrigen.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
+        raycastOrigen.topLeft = new Vector2(bounds.min.x, bounds.max.y);
+        raycastOrigen.topRight = new Vector2(bounds.max.x, bounds.max.y);
 
     }
 

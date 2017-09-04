@@ -57,10 +57,10 @@ public class PlayerMove : MonoBehaviour
         targetVelocityX = horizontalInput * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionState.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
 
-        if (controller.collisionState.isWallJumpable)
+        if (controller.collisionState.isAbleToWallJump)
         {
             // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((controller.collisionState.left && velocity.x < 0) || (controller.collisionState.right && velocity.x > 0)) && !controller.collisionState.slidingDownMaxSlope/*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            if (((controller.collisionState.left && velocity.x < 0) || (controller.collisionState.right && velocity.x > 0)) && !controller.collisionState.isSlidingDownMaxSlope/*&&!controller.collisionInfo.below && velocity.y < 0*/)
             {
                 //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
                 if (!controller.collisionState.below)
@@ -133,7 +133,7 @@ public class PlayerMove : MonoBehaviour
             //Normal Jump
             if (controller.collisionState.below)
             {
-                if (controller.collisionState.slidingDownMaxSlope)
+                if (controller.collisionState.isSlidingDownMaxSlope)
                 {
                     if (horizontalInput != -Mathf.Sign(controller.collisionState.slopeNormal.x)) //not jumping against slope
                     {
@@ -166,7 +166,7 @@ public class PlayerMove : MonoBehaviour
         //Deten el movimiento si está en el suelo o tocando algo arriba.
         if (controller.collisionState.above || controller.collisionState.below)
         {
-            if (controller.collisionState.slidingDownMaxSlope)
+            if (controller.collisionState.isSlidingDownMaxSlope)
             {
                 velocity.y += controller.collisionState.slopeNormal.y * -gravity * Time.deltaTime;
             }

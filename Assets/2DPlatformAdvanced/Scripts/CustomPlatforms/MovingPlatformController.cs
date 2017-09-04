@@ -148,7 +148,7 @@ public class MovingPlatformController : RaycastController {
             //Por cada raycast pregunta si toca un pasajero, lo que nos permite saber que tiene pasajeros la plataforma.
             for (int i = 0; i < verticalRayCount; i++)
             {
-                Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
+                Vector2 rayOrigin = (directionY == -1) ? raycastOrigen.bottomLeft : raycastOrigen.topLeft;
                 rayOrigin += Vector2.right * (verticalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, passengerMask);
 
@@ -173,7 +173,7 @@ public class MovingPlatformController : RaycastController {
 
             for (int i = 0; i < horizontalRayCount; i++)
             {
-                Vector2 rayOrigin = (directionX == -1) ? raycastOrigins.bottomLeft : raycastOrigins.bottomRight;
+                Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight;
                 rayOrigin += Vector2.up * (horizontalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, passengerMask);
 
@@ -198,7 +198,7 @@ public class MovingPlatformController : RaycastController {
 
             for (int i = 0; i < verticalRayCount; i++)
             {
-                Vector2 rayOrigin = raycastOrigins.topLeft + Vector2.right * (verticalRaySpacing * i);
+                Vector2 rayOrigin = raycastOrigen.topLeft + Vector2.right * (verticalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up, rayLength, passengerMask);
 
                 if (hit && hit.distance != 0)
