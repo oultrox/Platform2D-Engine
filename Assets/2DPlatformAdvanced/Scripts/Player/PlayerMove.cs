@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Controller2D))]
 public class PlayerMove : MonoBehaviour
 {
-
+    //Variables editables
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
 
@@ -15,22 +13,23 @@ public class PlayerMove : MonoBehaviour
     public float accelerationTimeGrounded = 0.1f;
     public float wallsSlideSpeedMax = 3;
     public float wallStickTime = 0.25f;
-    private float timeWallUnstick;
 
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;
     public Vector2 wallLeap;
 
+    //Variables privadas.
+    private float timeWallUnstick;
     private float maxJumpVelocity;
     private float minJumpVelocity;
     private float gravity; //Antes era -20, ahora es seteado en base a la altura del salto.
 
-    private Vector3 velocity;
-    private Controller2D controller;
     private float targetVelocityX;
     private float velocityXSmoothing;
-    private float h;
-    private float v;
+    private float horizontalInput;
+    private float verticalInput;
+    private Vector3 velocity;
+    private Controller2D controller;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
@@ -50,12 +49,12 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
         int wallDirX = (controller.collisionState.left) ? -1 : 1;
 
         //Transición suave de la velocidad del jugador.
-        targetVelocityX = h * moveSpeed;
+        targetVelocityX = horizontalInput * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionState.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
 
         if (controller.collisionState.isWallJumpable)
@@ -88,7 +87,7 @@ public class PlayerMove : MonoBehaviour
             {
                 velocityXSmoothing = 0;
                 velocity.x = 0;
-                if (h != wallDirX || h == 0)
+                if (horizontalInput != wallDirX || horizontalInput == 0)
                 {
                     timeWallUnstick -= Time.deltaTime;
                     if (timeWallUnstick <= 0)
@@ -96,7 +95,7 @@ public class PlayerMove : MonoBehaviour
                         isStickedToWall = false;
                     }
                 }
-                else if (h == wallDirX)
+                else if (horizontalInput == wallDirX)
                 {
                     timeWallUnstick = wallStickTime;
                 }
@@ -114,12 +113,12 @@ public class PlayerMove : MonoBehaviour
             //Wall jump
             if (isStickedToWall)
             {
-                if (wallDirX == h)
+                if (wallDirX == horizontalInput)
                 {
                     velocity.x = -wallDirX * wallJumpClimb.x;
                     velocity.y = wallJumpClimb.y;
                 }
-                else if (h == 0)
+                else if (horizontalInput == 0)
                 {
                     velocity.x = -wallDirX * wallJumpOff.x;
                     velocity.y = wallJumpOff.y;
@@ -136,7 +135,7 @@ public class PlayerMove : MonoBehaviour
             {
                 if (controller.collisionState.slidingDownMaxSlope)
                 {
-                    if (h != -Mathf.Sign(controller.collisionState.slopeNormal.x)) //not jumping against slope
+                    if (horizontalInput != -Mathf.Sign(controller.collisionState.slopeNormal.x)) //not jumping against slope
                     {
                         velocity.y = maxJumpVelocity * controller.collisionState.slopeNormal.y;
                         velocity.x = maxJumpVelocity * controller.collisionState.slopeNormal.x;
@@ -146,7 +145,6 @@ public class PlayerMove : MonoBehaviour
                 {
                     velocity.y = maxJumpVelocity;
                 }
-                
             }
 
         }
@@ -163,7 +161,7 @@ public class PlayerMove : MonoBehaviour
         //Gravedad
         velocity.y += gravity * Time.deltaTime;
         //Movmiento
-        controller.Move(velocity * Time.fixedDeltaTime,v);
+        controller.Move(velocity * Time.fixedDeltaTime,verticalInput);
 
         //Deten el movimiento si está en el suelo o tocando algo arriba.
         if (controller.collisionState.above || controller.collisionState.below)

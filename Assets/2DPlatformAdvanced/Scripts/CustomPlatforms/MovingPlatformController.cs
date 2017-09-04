@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class MovingPlatformController : RaycastController {
 
-    struct PassengerMovement
+    //Struct que contiene los estados de sus pasajeros.
+    private struct PassengerState
     {
         public Transform transform;
         public Vector3 velocity;
         public bool isStandingOnPlaform;
         public bool isMovingBeforePlatform;
 
-        public PassengerMovement(Transform _transform, Vector3 _velocity, bool _isStandingOnPlaform, bool _isMovingBeforePlatform)
+        //Constructor
+        public PassengerState(Transform _transform, Vector3 _velocity, bool _isStandingOnPlaform, bool _isMovingBeforePlatform)
         {
             transform = _transform;
             velocity = _velocity;
@@ -20,22 +22,24 @@ public class MovingPlatformController : RaycastController {
         }
     }
 
-    List<PassengerMovement> passengerMovements;
-    Dictionary<Transform, Controller2D> dictionaryPassengers = new Dictionary<Transform, Controller2D>();
+    //Variables editables 
+    public LayerMask passengerMask;     //El layermask donde debe registrar los pasajeros.
+    public Vector3[] localWaypoints;    //Las posiciones de los puntos por donde se moverá la plataforma.
+    [Range(0, 2)]
+    public float easeAmount;            //Cantidad de la suavidad que tendrá, varía entre 1 y 3.
+    public float speed;                 //Velocidad de la plataforma.
+    public float waitTime;              //Cantidad de tiempo a esperar entre movimientos de la plataforma.
+    public bool isCyclic;               //Si es cíclico o no.
 
-    public LayerMask passengerMask;
-    public Vector3[] localWaypoints;
-    private Vector3[] globalWayPointsPosition;
+    //Privates
+    private List<PassengerState> passengers;     //Lista de nuestro struct
+    private Dictionary<Transform, Controller2D> dictionaryPassengers = new Dictionary<Transform, Controller2D>(); //Diccionario utilizado para los pasajeros.
+    private Vector3[] globalWayPointsPosition;  // Convierte las posiciones locales que se ven en el editor en las posiciones globales para el mov.
+    private int fromWayPointIndex;              // Controla la posicion actual de la plataforma en terminos de waypoints.
+    private float percentBetweenWaypoints;      // Entre 0 y 1.
+    private float nextMoveTime;                 // Almacena cuando es el siguiente movimiento de cada iteracion.
 
-    public float speed;
-    int fromWayPointIndex;
-    float percentBetweenWaypoints; // Entre 0 y 1.
-    public bool isCyclic;
-    public float waitTime;
-    private float nextMoveTime;
-
-    [Range(0,2)]
-    public float easeAmount;
+    
 	// Use this for initialization
 	public override void Start ()
     {
@@ -58,26 +62,37 @@ public class MovingPlatformController : RaycastController {
         MovePassenger(false);
     }
 
-    float Ease(float x)
+    //Realiza el algoritmo para la suavidad del movimiento.
+    private float Ease(float x)
     {
         float a = easeAmount + 1;
         return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1-x, a));
     }
-    Vector3 CalculatePlatformMovement()
+
+    //Maneja el movimiento de la plataforma.
+    private Vector3 CalculatePlatformMovement()
     {
+        //Si aun no es tiempo de moverse, devolver 0.
         if (Time.time < nextMoveTime)
         {
             return Vector3.zero;
         }
+
         fromWayPointIndex %= globalWayPointsPosition.Length;
+        //Consigue el siguiente punto en el cual uno debe moverse.
         int toWayPointIndex = (fromWayPointIndex + 1) % globalWayPointsPosition.Length;
+        //Saca la distancia entre los puntos.
         float distanceBetweenWayPoints = Vector3.Distance(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex]);
+        //Se acumula el deltaTime * velocidad / distanca y se convierte todo a un porcentaje del 0 al 1.
         percentBetweenWaypoints += Time.deltaTime * speed / distanceBetweenWayPoints;
         percentBetweenWaypoints = Mathf.Clamp01(percentBetweenWaypoints);
+        //Aplica la suavidad(El calculo) al porcentaje creado entre los waypoints.
         float easedPercentBetweenWayPoints = Ease(percentBetweenWaypoints);
 
+        //La nueva posicion para llegar desde el punto actual hacia el otro con el porcentaje de movimiento entre los puntos.
         Vector3 newPos = Vector3.Lerp(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex], easedPercentBetweenWayPoints);
-
+        
+        //Si el porcentaje llego a 1 significa que se debe devolver, y si es ciclico va hacia el punto de inicio.
         if (percentBetweenWaypoints >= 1)
         {
             percentBetweenWaypoints = 0;
@@ -94,35 +109,43 @@ public class MovingPlatformController : RaycastController {
             }
             nextMoveTime = Time.time + waitTime;
         }
+
+        //Retorna la nueva posición.
         return newPos - transform.position;
     }
 
-    void MovePassenger(bool beforeMovePlatform)
+    //Mover a los pasajeros en base a el diccionario de los pasajeros que contiene la plataforma.
+    private void MovePassenger(bool beforeMovePlatform)
     {
-        for (int i = 0; i < passengerMovements.Count; i++)
+        //Para optimizar la llamada de los calculos se utiliza un diccionario que agrega a los pasajeros que no se encuentren y si los encuentra
+        //ejecuta directamente el componente de su controlador2D y lo mueve.
+        for (int i = 0; i < passengers.Count; i++)
         {
-            if (!dictionaryPassengers.ContainsKey(passengerMovements[i].transform))
+            if (!dictionaryPassengers.ContainsKey(passengers[i].transform))
             {
-                dictionaryPassengers.Add(passengerMovements[i].transform, passengerMovements[i].transform.GetComponent<Controller2D>());
+                dictionaryPassengers.Add(passengers[i].transform, passengers[i].transform.GetComponent<Controller2D>());
             }
-            if (passengerMovements[i].isMovingBeforePlatform == beforeMovePlatform)
+            if (passengers[i].isMovingBeforePlatform == beforeMovePlatform)
             {
-                dictionaryPassengers[passengerMovements[i].transform].Move(passengerMovements[i].velocity, passengerMovements[i].isStandingOnPlaform);
+                dictionaryPassengers[passengers[i].transform].Move(passengers[i].velocity, passengers[i].isStandingOnPlaform);
             }
         }
     }
-    void CalculatePassengerMovement(Vector3 velocity)
+
+    //Calcula el movimiento de los pasajeros.
+    private void CalculatePassengerMovement(Vector3 velocity)
     {
         HashSet<Transform> movedPassangers = new HashSet<Transform>();
-        passengerMovements = new List<PassengerMovement>();
+        passengers = new List<PassengerState>();
         float directionX = Mathf.Sign(velocity.x);
         float directionY = Mathf.Sign(velocity.y);
 
-        //Movimiento vertical
+        //Movimiento vertical 
         if (velocity.y != 0)
         {
             float rayLength = Mathf.Abs(velocity.y) + SKIN_WIDTH;
 
+            //Por cada raycast pregunta si toca un pasajero, lo que nos permite saber que tiene pasajeros la plataforma.
             for (int i = 0; i < verticalRayCount; i++)
             {
                 Vector2 rayOrigin = (directionY == -1) ? raycastOrigins.bottomLeft : raycastOrigins.topLeft;
@@ -137,7 +160,7 @@ public class MovingPlatformController : RaycastController {
                         float pushX = (directionY == 1) ? velocity.x : 0;
                         float pushY = velocity.y - (hit.distance - SKIN_WIDTH) * directionY;
 
-                        passengerMovements.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), directionY == 1, true));
+                        passengers.Add(new PassengerState(hit.transform, new Vector3(pushX, pushY), directionY == 1, true));
                     }
                 }
             }
@@ -162,7 +185,7 @@ public class MovingPlatformController : RaycastController {
                         float pushX = velocity.x - (hit.distance - SKIN_WIDTH) * directionX;
                         float pushY = -SKIN_WIDTH;
 
-                        passengerMovements.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), false, true));
+                        passengers.Add(new PassengerState(hit.transform, new Vector3(pushX, pushY), false, true));
                     }
                 }
             }
@@ -186,7 +209,7 @@ public class MovingPlatformController : RaycastController {
                         float pushX = velocity.x;
                         float pushY = velocity.y;
 
-                        passengerMovements.Add(new PassengerMovement(hit.transform, new Vector3(pushX, pushY), true, false));
+                        passengers.Add(new PassengerState(hit.transform, new Vector3(pushX, pushY), true, false));
                     }
                 }
             }
