@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-// Motor de física basado en Raycasts.
-
+//Motor físico basado en Raycasts.
 [RequireComponent(typeof(BoxCollider2D))]
 public class RaycastController : MonoBehaviour {
     
@@ -14,8 +11,10 @@ public class RaycastController : MonoBehaviour {
         public Vector2 bottomLeft, bottomRight;
     }
 
+    //Variables editables vía editor
     public LayerMask collisionMask;
 
+    //Heredado
     protected const float SKIN_WIDTH = 0.015f;
     protected const float DISTANCE_BETWEEN_RAYS = 0.1f;
 
@@ -27,7 +26,7 @@ public class RaycastController : MonoBehaviour {
     protected BoxCollider2D colliderObj;
     protected RaycastOrigin raycastOrigen;
 
-
+    //-----------Metodos API-----------
     // Use this for initialization
     public virtual void Start()
     {
@@ -35,6 +34,7 @@ public class RaycastController : MonoBehaviour {
         CalculateRaySpacing();
     }
 
+    //-----------Metodos custom-----------
     //Actualiza las lineas del raycast del origen en base al grosor del collider del jugador.
     public void UpdateRaycastOrigins()
     {
@@ -49,7 +49,7 @@ public class RaycastController : MonoBehaviour {
     }
 
     //calcula el espacio entre las lineas del raycasting. se hace 1 sóla vez.
-    public void CalculateRaySpacing()
+    private void CalculateRaySpacing()
     {
         Bounds bounds = colliderObj.bounds;
         bounds.Expand(SKIN_WIDTH * -2); 

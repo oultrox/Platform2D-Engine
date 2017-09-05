@@ -23,13 +23,13 @@ public class MovingPlatformController : RaycastController {
     }
 
     //Variables editables 
-    public LayerMask passengerMask;     //El layermask donde debe registrar los pasajeros.
-    public Vector3[] localWaypoints;    //Las posiciones de los puntos por donde se moverá la plataforma.
+    public LayerMask passengerMask;             //El layermask donde debe registrar los pasajeros.
+    public Vector3[] localWaypoints;            //Las posiciones de los puntos por donde se moverá la plataforma.
     [Range(0, 2)]
-    public float easeAmount;            //Cantidad de la suavidad que tendrá, varía entre 1 y 3.
-    public float speed;                 //Velocidad de la plataforma.
-    public float waitTime;              //Cantidad de tiempo a esperar entre movimientos de la plataforma.
-    public bool isCyclic;               //Si es cíclico o no.
+    public float easeAmount;                    //Cantidad de la suavidad que tendrá, varía entre 0 y 2.
+    public float speed;                         //Velocidad de la plataforma.
+    public float waitTime;                      //Cantidad de tiempo a esperar entre movimientos de la plataforma.
+    public bool isCyclic;                       //Si es cíclico o no.
 
     //Privates
     private List<PassengerState> passengers;     //Lista de nuestro struct
@@ -39,9 +39,9 @@ public class MovingPlatformController : RaycastController {
     private float percentBetweenWaypoints;      // Entre 0 y 1.
     private float nextMoveTime;                 // Almacena cuando es el siguiente movimiento de cada iteracion.
 
-    
-	// Use this for initialization
-	public override void Start ()
+    //----------Metodos API----------
+    //Inicialización
+    public override void Start ()
     {
         base.Start();
         globalWayPointsPosition = new Vector3[localWaypoints.Length];
@@ -62,6 +62,7 @@ public class MovingPlatformController : RaycastController {
         MovePassenger(false);
     }
 
+    //----------Metodos custom----------
     //Realiza el algoritmo para la suavidad del movimiento.
     private float Ease(float x)
     {
@@ -79,13 +80,14 @@ public class MovingPlatformController : RaycastController {
         }
 
         fromWayPointIndex %= globalWayPointsPosition.Length;
+
         //Consigue el siguiente punto en el cual uno debe moverse.
         int toWayPointIndex = (fromWayPointIndex + 1) % globalWayPointsPosition.Length;
-        //Saca la distancia entre los puntos.
+
         float distanceBetweenWayPoints = Vector3.Distance(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex]);
-        //Se acumula el deltaTime * velocidad / distanca y se convierte todo a un porcentaje del 0 al 1.
         percentBetweenWaypoints += Time.deltaTime * speed / distanceBetweenWayPoints;
         percentBetweenWaypoints = Mathf.Clamp01(percentBetweenWaypoints);
+
         //Aplica la suavidad(El calculo) al porcentaje creado entre los waypoints.
         float easedPercentBetweenWayPoints = Ease(percentBetweenWaypoints);
 
@@ -140,7 +142,7 @@ public class MovingPlatformController : RaycastController {
         float directionX = Mathf.Sign(velocity.x);
         float directionY = Mathf.Sign(velocity.y);
 
-        //Movimiento vertical 
+        //Chequeo movimiento vertical 
         if (velocity.y != 0)
         {
             float rayLength = Mathf.Abs(velocity.y) + SKIN_WIDTH;
@@ -152,6 +154,7 @@ public class MovingPlatformController : RaycastController {
                 rayOrigin += Vector2.right * (verticalRaySpacing * i);
                 RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, passengerMask);
 
+                //Si contiene un pasajero que no está almacenado, lo guarda.
                 if (hit && hit.distance != 0)
                 {
                     if (!movedPassangers.Contains(hit.transform))
@@ -166,7 +169,7 @@ public class MovingPlatformController : RaycastController {
             }
         }
 
-        // Horizontal movement platform
+        //Chequeo movimiento horizontal
         if (velocity.x != 0)
         {
             float rayLength = Mathf.Abs(velocity.x) + SKIN_WIDTH;
@@ -191,7 +194,7 @@ public class MovingPlatformController : RaycastController {
             }
         }
 
-        // Si hay un pasajero encima de una plataforma en movimiento (horizontal o vertical hacia abajo)
+        //Chequeo Si hay un pasajero encima de una plataforma en movimiento (horizontal o vertical hacia abajo)
         if (directionY == -1 || velocity.y == 0 && velocity.x != 0)
         {
             float rayLength = SKIN_WIDTH * 2;
@@ -217,6 +220,7 @@ public class MovingPlatformController : RaycastController {
         }
     }
 
+    //----------Metodos para el editor----------
     //Metodo para visualizar en el editor los waypoints locales y al ejecutar el juego
     //los globales de las plataformas en movimiento.
     private void OnDrawGizmos()
