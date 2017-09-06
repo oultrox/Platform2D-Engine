@@ -60,23 +60,22 @@ public class Controller2D : RaycastController {
     }
 
     //----------Metodos custom----------
-    //Sobrecarga de el metodo de movimiento
+    //Metodo de movimiento y sus sobrecargas.
     public void Move(Vector2 moveAmount, bool standingOnPlatform = false)
     {
         Move(moveAmount,0f, standingOnPlatform);
     }
 
-    //Funcion de movimiento de el player.
     public void Move(Vector2 moveAmount, float input, bool standingOnPlatform = false)
     {
         //Actualiza y resetea cada frame.
         UpdateRaycastOrigins();
         collisionInfo.Reset();
-
         collisionInfo.velocityOld = moveAmount;
-        playerVerticalInput = input;
 
-        //Pregunta si está descendiendo en caso de que esté descendiendo.
+        //Se usa para atravesar las plataformas.
+        playerVerticalInput = input;  
+
         if (moveAmount.y < 0)
         {
             DescendSlope(ref moveAmount);
@@ -87,10 +86,8 @@ public class Controller2D : RaycastController {
             collisionInfo.faceDir = (int)Mathf.Sign(moveAmount.x);
         }
 
-        //Chequeo de las colisiones horizontales
         HorizontalCollisions(ref moveAmount);
 
-        //Chequeo de las colisiones verticales
         if (moveAmount.y != 0)
         {
             VerticalCollisions(ref moveAmount);
@@ -105,7 +102,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    //Se Chequea las colisiones separadas vertical y horizontalmente.
+    //Se chequea las colisiones separadas vertical y horizontalmente para hacer más preciso la calculación de las rampas.
     private void VerticalCollisions(ref Vector2 velocity)
     {
         float directionY = Mathf.Sign(velocity.y);
@@ -132,6 +129,7 @@ public class Controller2D : RaycastController {
                         continue;
                     }
 
+                    //Si oprime hacia abajo, atravesar.
                     if (playerVerticalInput == -1)
                     {
                         if (collisionInfo.platformStanding.Equals(hit.collider))
@@ -148,7 +146,7 @@ public class Controller2D : RaycastController {
                 velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
                 rayLength = hit.distance;
 
-                //Corrige el movimiento horizontal en las empinadas o rampas.
+                //Corrige el movimiento en las empinadas o rampas.
                 if (collisionInfo.isClimbingSlope)
                 {
                     velocity.x =velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Abs(velocity.x);
@@ -211,6 +209,7 @@ public class Controller2D : RaycastController {
                         moveAmount.x -= distanceToSlopeStart * directionX;
                     }
 
+                    //Sube los slops en movimiento horizontal.
                     ClimbSlope(ref moveAmount, slopeAngle, hit.normal);
                     moveAmount.x += distanceToSlopeStart * directionX;
                 }
@@ -221,6 +220,7 @@ public class Controller2D : RaycastController {
                     moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
                     rayLength = hit.distance;
 
+                    //Corrige el movimiento en las empinadas o rampas.
                     if (collisionInfo.isClimbingSlope)
                     {
                         moveAmount.y = Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad ) * Mathf.Abs(moveAmount.x);

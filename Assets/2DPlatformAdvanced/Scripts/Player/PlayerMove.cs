@@ -37,7 +37,7 @@ public class PlayerMove : MonoBehaviour
 
 
     //-------Metodos API-------
-    // Use this for initialization
+    //Initialization
     private void Awake()
     {
         spriteRenderer = this.GetComponent<SpriteRenderer>();
@@ -54,11 +54,8 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-
         CalculateVelocity();
         HandleWallSliding();
-
-        //Movimiento
         playerController.Move(velocity * Time.fixedDeltaTime, verticalInput);
 
         //Deten el movimiento si está en el suelo o tocando algo arriba.
@@ -174,6 +171,7 @@ public class PlayerMove : MonoBehaviour
 
         if (playerController.collisionInfo.isStickedToWall)
         {
+            //Deslizar suavemente.
             if (!playerController.collisionInfo.left && !playerController.collisionInfo.right)
             {
                 playerController.collisionInfo.isStickedToWall = false;
@@ -183,6 +181,7 @@ public class PlayerMove : MonoBehaviour
                 velocity.y = -wallsSlideSpeedMax;
             }
 
+            //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
             if (timeWallUnstick > 0)
             {
                 velocityXSmoothing = 0;
