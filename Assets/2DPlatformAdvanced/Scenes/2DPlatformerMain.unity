@@ -169,7 +169,7 @@ Prefab:
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: wallLeap.x
-      value: 12
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
@@ -194,7 +194,7 @@ Prefab:
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: accelerationOnGround
-      value: 0.03
+      value: 0.025
       objectReference: {fileID: 0}
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
@@ -204,7 +204,7 @@ Prefab:
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: wallLeap.y
-      value: 12
+      value: 13
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e7fcecc826687024e9b52ec763b14088, type: 2}
