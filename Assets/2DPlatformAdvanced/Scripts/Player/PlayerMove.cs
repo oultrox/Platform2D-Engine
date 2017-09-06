@@ -9,8 +9,8 @@ public class PlayerMove : MonoBehaviour
 
     public float timeToJumpApex = 0.4f;
     public float moveSpeed = 6;
-    public float accelerationTimeAirborne = 0.2f;
-    public float accelerationTimeGrounded = 0.1f;
+    public float accelerationOnGround = 0.03f;
+    public float accelerationOnAir = 0.1f;
     public float wallsSlideSpeedMax = 3;
     public float wallStickTime = 0.25f;
 
@@ -19,6 +19,7 @@ public class PlayerMove : MonoBehaviour
     public Vector2 wallLeap;
 
     //Variables privadas.
+    private int wallDirX;
     private float timeWallUnstick;
     private float maxJumpVelocity;
     private float minJumpVelocity;
@@ -29,10 +30,10 @@ public class PlayerMove : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
     private Vector3 velocity;
-    private Controller2D controller;
+    private Controller2D playerController;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-    private bool isStickedToWall = false;
+
 
 
     //-------Metodos API-------
@@ -41,7 +42,7 @@ public class PlayerMove : MonoBehaviour
     {
         spriteRenderer = this.GetComponent<SpriteRenderer>();
         animator = this.GetComponent<Animator>();
-        controller = this.GetComponent<Controller2D>();
+        playerController = this.GetComponent<Controller2D>();
     }
 
     void Start()
@@ -53,34 +54,129 @@ public class PlayerMove : MonoBehaviour
 
     private void Update()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
-        int wallDirX = (controller.collisionInfo.left) ? -1 : 1;
 
-        //Transición suave de la velocidad del jugador.
-        targetVelocityX = horizontalInput * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisionInfo.below) ? accelerationTimeAirborne : accelerationTimeGrounded);
+        CalculateVelocity();
+        HandleWallSliding();
 
-        if (controller.collisionInfo.isAbleToWallJump)
+        //Movimiento
+        playerController.Move(velocity * Time.fixedDeltaTime, verticalInput);
+
+        //Deten el movimiento si está en el suelo o tocando algo arriba.
+        if (playerController.collisionInfo.above || playerController.collisionInfo.below)
         {
-            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((controller.collisionInfo.left && velocity.x < 0) || (controller.collisionInfo.right && velocity.x > 0)) && !controller.collisionInfo.isSlidingDownMaxSlope/*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            if (playerController.collisionInfo.isSlidingDownMaxSlope)
             {
-                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
-                if (!controller.collisionInfo.below)
-                {
-                    isStickedToWall = true;
-                }
-                
+                velocity.y += playerController.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
+            }
+            else
+            {
+                velocity.y = 0;
             }
 
         }
 
-        if (isStickedToWall)
+        //Animation stuff
+        if (velocity.x != 0)
         {
-            if (!controller.collisionInfo.left && !controller.collisionInfo.right)
+            spriteRenderer.flipX = velocity.x < 0;
+        }
+
+        animator.SetBool("grounded", playerController.collisionInfo.below);
+        animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
+    }
+
+    //---------Metodos custom--------
+
+    public void SetDirectionalInput(float inputX, float inputY)
+    {
+        horizontalInput = inputX;
+        verticalInput = inputY;
+    }
+
+    public void JumpInputDown()
+    {
+        //Wall jump
+        if (playerController.collisionInfo.isStickedToWall)
+        {
+            if (wallDirX == horizontalInput)
             {
-                isStickedToWall = false;
+                velocity.x = -wallDirX * wallJumpClimb.x;
+                velocity.y = wallJumpClimb.y;
+            }
+            else if (horizontalInput == 0)
+            {
+                velocity.x = -wallDirX * wallJumpOff.x;
+                velocity.y = wallJumpOff.y;
+            }
+            else
+            {
+                velocity.x = -wallDirX * wallLeap.x;
+                velocity.y = wallLeap.y;
+            }
+            playerController.collisionInfo.isStickedToWall = false;
+        }
+
+        //Normal Jump
+        if (playerController.collisionInfo.below)
+        {
+            if (playerController.collisionInfo.isSlidingDownMaxSlope)
+            {
+                if (horizontalInput != -Mathf.Sign(playerController.collisionInfo.slopeNormal.x)) //not jumping against slope
+                {
+                    velocity.y = maxJumpVelocity * playerController.collisionInfo.slopeNormal.y;
+                    velocity.x = maxJumpVelocity * playerController.collisionInfo.slopeNormal.x;
+                }
+            }
+            else
+            {
+                velocity.y = maxJumpVelocity;
+            }
+        }
+    }
+
+
+    public void JumpInputUp()
+    {
+        //Al soltar el espacio, si la velocidad Y es mayor al a minima, setearla, esto es para el jump sustain.
+        if (velocity.y > minJumpVelocity)
+        {
+            velocity.y = minJumpVelocity;
+        }
+    }
+
+    private void CalculateVelocity()
+    {
+        //Transición suave de la velocidad del jugador.
+        targetVelocityX = horizontalInput * moveSpeed;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerController.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
+        //Gravedad
+        velocity.y += gravity * Time.deltaTime;
+    }
+
+    private void HandleWallSliding()
+    {
+        wallDirX = (playerController.collisionInfo.left) ? -1 : 1;
+
+        if (playerController.collisionInfo.isAbleToWallJump)
+        {
+            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
+            if (((playerController.collisionInfo.left && velocity.x < 0) || (playerController.collisionInfo.right && velocity.x > 0)) && !playerController.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            {
+                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
+                if (!playerController.collisionInfo.below)
+                {
+                    playerController.collisionInfo.isStickedToWall = true;
+                }
+
+            }
+
+        }
+
+        if (playerController.collisionInfo.isStickedToWall)
+        {
+            if (!playerController.collisionInfo.left && !playerController.collisionInfo.right)
+            {
+                playerController.collisionInfo.isStickedToWall = false;
             }
             if (velocity.y < -wallsSlideSpeedMax)
             {
@@ -96,7 +192,7 @@ public class PlayerMove : MonoBehaviour
                     timeWallUnstick -= Time.deltaTime;
                     if (timeWallUnstick <= 0)
                     {
-                        isStickedToWall = false;
+                        playerController.collisionInfo.isStickedToWall = false;
                     }
                 }
                 else if (horizontalInput == wallDirX)
@@ -110,85 +206,5 @@ public class PlayerMove : MonoBehaviour
                 timeWallUnstick = wallStickTime;
             }
         }
-
-        //JUMP
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            //Wall jump
-            if (isStickedToWall)
-            {
-                if (wallDirX == horizontalInput)
-                {
-                    velocity.x = -wallDirX * wallJumpClimb.x;
-                    velocity.y = wallJumpClimb.y;
-                }
-                else if (horizontalInput == 0)
-                {
-                    velocity.x = -wallDirX * wallJumpOff.x;
-                    velocity.y = wallJumpOff.y;
-                }
-                else
-                {
-                    velocity.x = -wallDirX * wallLeap.x;
-                    velocity.y = wallLeap.y;
-                }
-                isStickedToWall = false;
-            }
-            //Normal Jump
-            if (controller.collisionInfo.below)
-            {
-                if (controller.collisionInfo.isSlidingDownMaxSlope)
-                {
-                    if (horizontalInput != -Mathf.Sign(controller.collisionInfo.slopeNormal.x)) //not jumping against slope
-                    {
-                        velocity.y = maxJumpVelocity * controller.collisionInfo.slopeNormal.y;
-                        velocity.x = maxJumpVelocity * controller.collisionInfo.slopeNormal.x;
-                    }
-                }
-                else
-                {
-                    velocity.y = maxJumpVelocity;
-                }
-            }
-
-        }
-
-        //Al soltar el espacio, si la velocidad Y es mayor al a minima, setearla, esto es para el jump sustain.
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            if (velocity.y > minJumpVelocity)
-            {
-                velocity.y = minJumpVelocity;
-            }
-        }
-
-        //Gravedad
-        velocity.y += gravity * Time.deltaTime;
-
-        //Movimiento
-        controller.Move(velocity * Time.fixedDeltaTime,verticalInput);
-
-        //Deten el movimiento si está en el suelo o tocando algo arriba.
-        if (controller.collisionInfo.above || controller.collisionInfo.below)
-        {
-            if (controller.collisionInfo.isSlidingDownMaxSlope)
-            {
-                velocity.y += controller.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
-            }
-            else
-            {
-                velocity.y = 0;
-            }
-            
-        }
-
-        //Animation stuff
-        if (velocity.x != 0)
-        {
-            spriteRenderer.flipX = velocity.x < 0;
-        }
-
-        animator.SetBool("grounded", controller.collisionInfo.below);
-        animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
     }
 }

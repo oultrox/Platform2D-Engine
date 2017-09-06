@@ -7,10 +7,12 @@ public class PlayerMeleeAttack : MonoBehaviour {
 
     [SerializeField] private float timeBetweenAttacks;
     private GameObject slashObject;
+    private Transform slashChildren;
     private Animator animator;
     private SpriteRenderer playerOrientation;
+    private Controller2D playerController;
     private float timeCounter = 0;
-    private Transform slashChildren;
+    
 
     //--------Métodos API--------
     private void Awake()
@@ -25,6 +27,7 @@ public class PlayerMeleeAttack : MonoBehaviour {
         animator = slashObject.GetComponent<Animator>();
         slashChildren = slashObject.transform;
         playerOrientation = this.GetComponentInParent<SpriteRenderer>();
+        playerController = this.GetComponent<Controller2D>();
     }
 
     private void Start()
@@ -35,9 +38,9 @@ public class PlayerMeleeAttack : MonoBehaviour {
     private void Update()
     {
         timeCounter += Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.J))
         {
-            if (timeCounter >= timeBetweenAttacks)
+            if (timeCounter >= timeBetweenAttacks && !playerController.collisionInfo.isStickedToWall)
             {
                 timeCounter = 0;
                 StartCoroutine(Slash());

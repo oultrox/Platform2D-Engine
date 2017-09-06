@@ -10,7 +10,9 @@ public class Controller2D : RaycastController {
         public bool above, below;
         public bool left, right;
 
+        //Wall jump
         public bool isAbleToWallJump;
+        public bool isStickedToWall;
 
         //Slopes
         public bool isClimbingSlope;
@@ -23,7 +25,7 @@ public class Controller2D : RaycastController {
 
         public Vector2 velocityOld;
         public Vector2 slopeNormal;
-        public Collider2D fallThroughPlatform;
+        public Collider2D platformStanding;
 
         public void Reset()
         {
@@ -132,15 +134,15 @@ public class Controller2D : RaycastController {
 
                     if (playerVerticalInput == -1)
                     {
-                        if (collisionInfo.fallThroughPlatform.Equals(hit.collider))
+                        if (collisionInfo.platformStanding.Equals(hit.collider))
                         {
                             continue;
                         }
-                        collisionInfo.fallThroughPlatform = hit.collider;
+                        collisionInfo.platformStanding = hit.collider;
                     }
                 }
                 //Almacena la informacion del collider con el que colisiona para preguntar si es el collider con el que se puede bajar.
-                collisionInfo.fallThroughPlatform = hit.collider;
+                collisionInfo.platformStanding = hit.collider;
 
                 //Aplica el movimiento vertical a base del a distancia del hit del raycast y la dirección vertical (directionY)
                 velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
