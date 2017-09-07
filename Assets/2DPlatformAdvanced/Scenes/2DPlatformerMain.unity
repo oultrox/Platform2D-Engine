@@ -1208,7 +1208,6 @@ GameObject:
   - component: {fileID: 1135360104}
   - component: {fileID: 1135360107}
   - component: {fileID: 1135360108}
-  - component: {fileID: 1135360109}
   m_Layer: 9
   m_Name: enemySlime
   m_TagString: Enemy
@@ -1332,17 +1331,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 0.4402616}
   m_EdgeRadius: 0
---- !u!114 &1135360109
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1135360103}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 517bc1bac1c301a40bdec6b24725f46a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1176645091
 GameObject:
   m_ObjectHideFlags: 0
