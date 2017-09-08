@@ -164,12 +164,12 @@ Prefab:
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: wallJumpClimb.x
-      value: 12
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: wallLeap.x
-      value: 15
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
@@ -199,7 +199,7 @@ Prefab:
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
       propertyPath: accelerationOnAir
-      value: 0.07
+      value: 0.06
       objectReference: {fileID: 0}
     - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
         type: 2}
@@ -210,6 +210,16 @@ Prefab:
         type: 2}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
+        type: 2}
+      propertyPath: wallJumpOff.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114182198754147886, guid: e7fcecc826687024e9b52ec763b14088,
+        type: 2}
+      propertyPath: wallJumpOff.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e7fcecc826687024e9b52ec763b14088, type: 2}
@@ -1938,7 +1948,7 @@ Prefab:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}
       propertyPath: orthographic size
-      value: 3.296875
+      value: 3.171875
       objectReference: {fileID: 0}
     - target: {fileID: 114123390247084860, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 2}

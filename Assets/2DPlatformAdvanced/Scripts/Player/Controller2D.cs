@@ -102,7 +102,7 @@ public class Controller2D : RaycastController {
         }
     }
 
-    //Se chequea las colisiones separadas vertical y horizontalmente para hacer más preciso la calculación de las rampas.
+    //Se chequea las colisiones verticales y horizontales de manera separada para hacer más preciso la calculación en rampas y superficies.
     private void HorizontalCollisions(ref Vector2 moveAmount)
     {
         float directionX = collisionInfo.faceDir;
@@ -174,40 +174,20 @@ public class Controller2D : RaycastController {
                     collisionInfo.left = directionX == -1;
                     collisionInfo.right = directionX == 1;
                 }
-
-            }
-        }
-
-        if (collisionInfo.isClimbingSlope)
-        {
-            directionX = Mathf.Sign(moveAmount.x);
-            rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
-            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight) + Vector2.up * moveAmount.y;
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
-
-            if (hit)
-            {
-                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-                if (slopeAngle != collisionInfo.slopeAngle)
-                {
-                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
-                    collisionInfo.slopeAngle = slopeAngle;
-                    collisionInfo.slopeNormal = hit.normal;
-                }
             }
         }
     }
 
-    private void VerticalCollisions(ref Vector2 velocity)
+    private void VerticalCollisions(ref Vector2 moveAmount)
     {
-        float directionY = Mathf.Sign(velocity.y);
-        float rayLength = Mathf.Abs(velocity.y) + SKIN_WIDTH;
+        float directionY = Mathf.Sign(moveAmount.y);
+        float rayLength = Mathf.Abs(moveAmount.y) + SKIN_WIDTH;
 
         //Por la cantidad de los rayos necesarios verticales, lanzará los raycast para preguntar si colisionó con algo.
         for (int i = 0; i < verticalRayCount; i++)
         {
             Vector2 rayOrigin = (directionY == -1) ? raycastOrigen.bottomLeft : raycastOrigen.topLeft;
-            rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
+            rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
 
             //BEAM! Lanza el rayo que es el que contiene la colisión que se condicionará dependiendo de lo que pegó.
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
@@ -238,18 +218,38 @@ public class Controller2D : RaycastController {
                 collisionInfo.platformStanding = hit.collider;
 
                 //Aplica el movimiento vertical a base del a distancia del hit del raycast y la dirección vertical (directionY)
-                velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
+                moveAmount.y = (hit.distance - SKIN_WIDTH) * directionY;
                 rayLength = hit.distance;
 
                 //Corrige las colisiones de arriba actualizando el movimiento en X (Si es que está escalando).
                 if (collisionInfo.isClimbingSlope)
                 {
-                    velocity.x = velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Sign(velocity.x);
+                    moveAmount.x = moveAmount.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Sign(moveAmount.x);
                 }
                 
                 //Condiciona sus estados de si está tocando por abajo o por arriba en base a la dirección vertical.
                 collisionInfo.below = directionY == -1;
                 collisionInfo.above = directionY == 1;
+            }
+        }
+
+        //Corrige el movimiento en interseccinoes de rampas.
+        if (collisionInfo.isClimbingSlope)
+        {
+            float directionX = Mathf.Sign(moveAmount.x);
+            rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
+            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight) + Vector2.up * moveAmount.y;
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+
+            if (hit)
+            {
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+                if (slopeAngle != collisionInfo.slopeAngle)
+                {
+                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
+                    collisionInfo.slopeAngle = slopeAngle;
+                    collisionInfo.slopeNormal = hit.normal;
+                }
             }
         }
     }
