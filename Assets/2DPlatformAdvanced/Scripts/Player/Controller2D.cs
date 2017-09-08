@@ -103,6 +103,101 @@ public class Controller2D : RaycastController {
     }
 
     //Se chequea las colisiones separadas vertical y horizontalmente para hacer más preciso la calculación de las rampas.
+    private void HorizontalCollisions(ref Vector2 moveAmount)
+    {
+        float directionX = collisionInfo.faceDir;
+        float rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
+
+        if (Mathf.Abs(moveAmount.x) < SKIN_WIDTH)
+        {
+            rayLength = 2 * SKIN_WIDTH;
+        }
+
+        //Sistema similar al vertical solo que aquí condicionamos el movimiento en rampas.
+        for (int i = 0; i < horizontalRayCount; i++)
+        {
+            Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight;
+            rayOrigin += Vector2.up * (horizontalRaySpacing * i);
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+            Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
+
+            if (hit)
+            {
+                //Checking si el muro con el cual está colisionando es escalable.
+                if (hit.collider.CompareTag("Escalable"))
+                {
+                    collisionInfo.isAbleToWallJump = true;
+                }
+
+                //Checking si está dentro de un obstaculo en movimiento, que no le dificulte moverse saliendo de la iteración.
+                if (hit.distance == 0)
+                {
+                    continue;
+                }
+
+                //Para tomar las rampas de manera correcta, consigue el angulo de la normal y pregunta si cumple con el minimo de empinación
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+                if (i == 0 && slopeAngle <= maxSlopeAngle)
+                {
+                    //Si está descendiendo aplicar la velocidad antigua que tenía.
+                    if (collisionInfo.isDescendingSlope)
+                    {
+                        collisionInfo.isDescendingSlope = false;
+                        moveAmount = collisionInfo.velocityOld;
+                    }
+
+                    //Si entramos a una nueva rampa, crea el movimiento en X preciso pegado a la rampa de acuerdo a la distancia de este nuevo angulo.
+                    float distanceToSlopeStart = 0;
+                    if (slopeAngle != collisionInfo.slopeAngleOld)
+                    {
+                        distanceToSlopeStart = hit.distance - SKIN_WIDTH;
+                        moveAmount.x -= distanceToSlopeStart * directionX;
+                    }
+
+                    //Sube los slops en movimiento horizontal.
+                    ClimbSlope(ref moveAmount, slopeAngle, hit.normal);
+                    moveAmount.x += distanceToSlopeStart * directionX;
+                }
+
+                //Aplica movimiento horizontal con sus raycasts directo si no está escalando rampas.
+                if (!collisionInfo.isClimbingSlope || slopeAngle > maxSlopeAngle)
+                {
+                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
+                    rayLength = hit.distance;
+
+                    //Corrige las colisiones de lado actualizando el movimiento en Y (Si es que está escalando).
+                    if (collisionInfo.isClimbingSlope)
+                    {
+                        moveAmount.y = Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveAmount.x);
+                    }
+
+                    collisionInfo.left = directionX == -1;
+                    collisionInfo.right = directionX == 1;
+                }
+
+            }
+        }
+
+        if (collisionInfo.isClimbingSlope)
+        {
+            directionX = Mathf.Sign(moveAmount.x);
+            rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
+            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight) + Vector2.up * moveAmount.y;
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
+
+            if (hit)
+            {
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+                if (slopeAngle != collisionInfo.slopeAngle)
+                {
+                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
+                    collisionInfo.slopeAngle = slopeAngle;
+                    collisionInfo.slopeNormal = hit.normal;
+                }
+            }
+        }
+    }
+
     private void VerticalCollisions(ref Vector2 velocity)
     {
         float directionY = Mathf.Sign(velocity.y);
@@ -146,109 +241,15 @@ public class Controller2D : RaycastController {
                 velocity.y = (hit.distance - SKIN_WIDTH) * directionY;
                 rayLength = hit.distance;
 
-                //Corrige el movimiento en las empinadas o rampas.
+                //Corrige las colisiones de arriba actualizando el movimiento en X (Si es que está escalando).
                 if (collisionInfo.isClimbingSlope)
                 {
-                    velocity.x =velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Abs(velocity.x);
+                    velocity.x = velocity.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Sign(velocity.x);
                 }
                 
                 //Condiciona sus estados de si está tocando por abajo o por arriba en base a la dirección vertical.
                 collisionInfo.below = directionY == -1;
                 collisionInfo.above = directionY == 1;
-            }
-        }
-    }
-
-    private void HorizontalCollisions(ref Vector2 moveAmount)
-    {
-        float directionX = collisionInfo.faceDir;
-        float rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
-
-        if (Mathf.Abs(moveAmount.x) < SKIN_WIDTH){
-            rayLength = 2 * SKIN_WIDTH;
-        }
-
-        //Sistema similar al vertical solo que aquí condicionamos el movimiento en rampas.
-        for (int i = 0; i < horizontalRayCount; i++)
-        {
-            Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight;
-            rayOrigin += Vector2.up * (horizontalRaySpacing * i);
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
-            Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
-
-            if (hit)
-            {
-                //Checking si el muro con el cual está colisionando es escalable.
-                if (hit.collider.CompareTag("Escalable"))
-                {
-                    collisionInfo.isAbleToWallJump = true;
-                }
-
-                //Checking si está dentro de un obstaculo en movimiento, que no le dificulte moverse saliendo de la iteración.
-                if (hit.distance == 0)
-                {
-                    continue;
-                }
-
-                //Para tomar las rampas de manera correcta, consigue el angulo de la normal y pregunta si cumple con el minimo de empinación
-                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-                if (i==0 && slopeAngle <= maxSlopeAngle)
-                {
-                    //Si está descendiendo aplicar la velocidad antigua que tenía.
-                    if (collisionInfo.isDescendingSlope)
-                    {
-                        collisionInfo.isDescendingSlope = false;
-                        moveAmount = collisionInfo.velocityOld; 
-                    }
-
-                    //Si entramos a una nueva rampa, crea el movimiento en X de acuerdo a la distancia de este nuevo angulo.
-                    float distanceToSlopeStart = 0;
-                    if (slopeAngle!= collisionInfo.slopeAngleOld)
-                    {
-                        distanceToSlopeStart = hit.distance - SKIN_WIDTH;
-                        moveAmount.x -= distanceToSlopeStart * directionX;
-                    }
-
-                    //Sube los slops en movimiento horizontal.
-                    ClimbSlope(ref moveAmount, slopeAngle, hit.normal);
-                    moveAmount.x += distanceToSlopeStart * directionX;
-                }
-
-                //Aplica movimiento horizontal directo debido a que no está escalando rampas.
-                if (!collisionInfo.isClimbingSlope || slopeAngle > maxSlopeAngle)
-                {
-                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
-                    rayLength = hit.distance;
-
-                    //Corrige el movimiento en las empinadas o rampas.
-                    if (collisionInfo.isClimbingSlope)
-                    {
-                        moveAmount.y = Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad ) * Mathf.Abs(moveAmount.x);
-                    }
-
-                    collisionInfo.left = directionX == -1;
-                    collisionInfo.right = directionX == 1;
-                }
-                
-            }
-        }
-
-        if (collisionInfo.isClimbingSlope)
-        {
-            directionX = Mathf.Sign(moveAmount.x);
-            rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
-            Vector2 rayOrigin = ((directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight) + Vector2.up * moveAmount.y;
-            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
-
-            if (hit)
-            {
-                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-                if (slopeAngle != collisionInfo.slopeAngle)
-                {
-                    moveAmount.x = (hit.distance - SKIN_WIDTH) * directionX;
-                    collisionInfo.slopeAngle = slopeAngle;
-                    collisionInfo.slopeNormal = hit.normal;
-                }
             }
         }
     }
