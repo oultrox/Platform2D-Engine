@@ -7,8 +7,6 @@ public class PlayerHealth : MonoBehaviour {
 
     [SerializeField] private int playerHP;
 	
-
-    //test
     public void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Enemy"))
