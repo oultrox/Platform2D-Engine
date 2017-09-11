@@ -5,9 +5,8 @@ using UnityEngine;
 //Clase que será usada por las entidades que llamará los estados.
 public class EnemyStateMachine : MonoBehaviour {
 
-    public State currentState;
-    public State remainState;
-
+    [SerializeField] private State currentState;
+    [SerializeField] private State remainState;
     private Enemy enemy;
     private bool aiActive;
 
@@ -15,13 +14,10 @@ public class EnemyStateMachine : MonoBehaviour {
     private void Awake()
     {
         enemy = this.GetComponent<Enemy>();
+        aiActive = true;
     }
 
-    void Start () {
-        aiActive = true;
-	}
-	
-	void Update () {
+    void Update () {
 
         if (aiActive)
         {

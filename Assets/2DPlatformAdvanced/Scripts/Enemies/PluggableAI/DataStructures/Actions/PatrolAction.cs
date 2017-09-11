@@ -18,7 +18,7 @@ public class PatrolAction : Action {
 
     private void Move(EnemyStateMachine state)
     {
-        state.Enemy.EnemyTransform.Translate(state.Enemy.GetDirection() * (state.Enemy.MovementSpeed * Time.deltaTime));
+        state.Enemy.EnemyTransform.Translate(state.Enemy.GetMoveDirection() * (state.Enemy.MovementSpeed * Time.deltaTime));
     }
 
     

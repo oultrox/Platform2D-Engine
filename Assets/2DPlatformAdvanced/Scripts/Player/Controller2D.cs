@@ -102,6 +102,7 @@ public class Controller2D : RaycastController {
         }
     }
 
+
     //Se chequea las colisiones verticales y horizontales de manera separada para hacer más preciso la calculación en rampas y superficies.
     private void HorizontalCollisions(ref Vector2 moveAmount)
     {
