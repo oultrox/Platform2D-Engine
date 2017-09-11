@@ -2,6 +2,6 @@
 
 public abstract class Decision : ScriptableObject
 {
-    public abstract bool Decide(StateMachine stateController);
+    public abstract bool Decide(EnemyStateMachine stateController);
 
 }

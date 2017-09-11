@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "PluggableAI/State")]
 public class State : ScriptableObject
@@ -10,13 +8,15 @@ public class State : ScriptableObject
     public Transition[] transitions;
     public Color sceneGizmoColor = Color.grey;
 
-    public void UpdateState(StateMachine controller)
+    private bool decisionSucceded;
+
+    public void UpdateState(EnemyStateMachine controller)
     {
         DoAction(controller);
         CheckTransitions(controller);
     }
 
-    private void DoAction(StateMachine stateController)
+    private void DoAction(EnemyStateMachine stateController)
     {
         for (int i = 0; i < actions.Length; i++)
         {
@@ -24,11 +24,11 @@ public class State : ScriptableObject
         }
     }
 
-    private void CheckTransitions(StateMachine stateController)
+    private void CheckTransitions(EnemyStateMachine stateController)
     {
         for (int i = 0; i < transitions.Length; i++)
         {
-            bool decisionSucceded = transitions[i].decision.Decide(stateController);
+            decisionSucceded = transitions[i].decision.Decide(stateController);
 
             if (decisionSucceded)
             {
