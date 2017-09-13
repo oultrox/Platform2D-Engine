@@ -84,6 +84,69 @@ public class PlayerMove : MonoBehaviour
 
     //---------Metodos custom--------
 
+    private void CalculateVelocity()
+    {
+        //Transición suave de la velocidad del jugador.
+        targetVelocityX = horizontalInput * moveSpeed;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerController.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
+        //Gravedad
+        velocity.y += gravity * Time.deltaTime;
+    }
+
+    private void HandleWallSliding()
+    {
+        wallDirX = (playerController.collisionInfo.left) ? -1 : 1;
+
+        if (playerController.collisionInfo.isAbleToWallJump)
+        {
+            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
+            if (((playerController.collisionInfo.left && velocity.x < 0) || (playerController.collisionInfo.right && velocity.x > 0)) && !playerController.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            {
+                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
+                if (!playerController.collisionInfo.below)
+                {
+                    playerController.collisionInfo.isStickedToWall = true;
+                }
+            }
+        }
+
+        if (playerController.collisionInfo.isStickedToWall)
+        {
+            //Deslizar suavemente.
+            if (!playerController.collisionInfo.left && !playerController.collisionInfo.right)
+            {
+                playerController.collisionInfo.isStickedToWall = false;
+            }
+            if (velocity.y < -wallsSlideSpeedMax)
+            {
+                velocity.y = -wallsSlideSpeedMax;
+            }
+
+            //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
+            if (timeWallUnstick > 0)
+            {
+                velocityXSmoothing = 0;
+                velocity.x = 0;
+                if (horizontalInput != wallDirX || horizontalInput == 0)
+                {
+                    timeWallUnstick -= Time.deltaTime;
+                    if (timeWallUnstick <= 0)
+                    {
+                        playerController.collisionInfo.isStickedToWall = false;
+                    }
+                }
+                else if (horizontalInput == wallDirX)
+                {
+                    timeWallUnstick = wallStickTime;
+                }
+            }
+            else
+            {
+                timeWallUnstick = wallStickTime;
+            }
+        }
+    }
+
     public void SetDirectionalInput(float inputX, float inputY)
     {
         horizontalInput = inputX;
@@ -141,69 +204,4 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    private void CalculateVelocity()
-    {
-        //Transición suave de la velocidad del jugador.
-        targetVelocityX = horizontalInput * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerController.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
-        //Gravedad
-        velocity.y += gravity * Time.deltaTime;
-    }
-
-    private void HandleWallSliding()
-    {
-        wallDirX = (playerController.collisionInfo.left) ? -1 : 1;
-
-        if (playerController.collisionInfo.isAbleToWallJump)
-        {
-            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((playerController.collisionInfo.left && velocity.x < 0) || (playerController.collisionInfo.right && velocity.x > 0)) && !playerController.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
-            {
-                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
-                if (!playerController.collisionInfo.below)
-                {
-                    playerController.collisionInfo.isStickedToWall = true;
-                }
-
-            }
-
-        }
-
-        if (playerController.collisionInfo.isStickedToWall)
-        {
-            //Deslizar suavemente.
-            if (!playerController.collisionInfo.left && !playerController.collisionInfo.right)
-            {
-                playerController.collisionInfo.isStickedToWall = false;
-            }
-            if (velocity.y < -wallsSlideSpeedMax)
-            {
-                velocity.y = -wallsSlideSpeedMax;
-            }
-
-            //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
-            if (timeWallUnstick > 0)
-            {
-                velocityXSmoothing = 0;
-                velocity.x = 0;
-                if (horizontalInput != wallDirX || horizontalInput == 0)
-                {
-                    timeWallUnstick -= Time.deltaTime;
-                    if (timeWallUnstick <= 0)
-                    {
-                        playerController.collisionInfo.isStickedToWall = false;
-                    }
-                }
-                else if (horizontalInput == wallDirX)
-                {
-                    timeWallUnstick = wallStickTime;
-                }
-
-            }
-            else
-            {
-                timeWallUnstick = wallStickTime;
-            }
-        }
-    }
 }

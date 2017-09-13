@@ -9,9 +9,11 @@ public class Enemy : MonoBehaviour {
     [SerializeField] protected float movementSpeed = 5;
     [SerializeField] protected int enemyHP = 100;
     [SerializeField] protected int touchDamage = 10;
+    [SerializeField] protected int idleDuration = 7;
     protected Transform enemyTransform;
     protected Animator animator;
     protected BoxCollider2D hitbox;
+   
 
     public virtual void Awake()
     {
@@ -88,6 +90,19 @@ public class Enemy : MonoBehaviour {
         set
         {
             touchDamage = value;
+        }
+    }
+
+    public int IdleDuration
+    {
+        get
+        {
+            return idleDuration;
+        }
+
+        set
+        {
+            idleDuration = value;
         }
     }
     #endregion

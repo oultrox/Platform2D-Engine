@@ -1,16 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class IdleAction : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+[CreateAssetMenu(menuName = "PluggableAI/Actions/Idle")]
+public class IdleAction : Action
+{
+    public override void Act(EnemyStateMachine stateController)
+    {
+        Debug.Log("Estoy en Idle!");
+    }
 }
