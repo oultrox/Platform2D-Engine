@@ -212,7 +212,7 @@ public class Controller2D : RaycastController {
             if (raycastHit)
             {
                 //Almacena el collider para atravesar plataformas habilitadas.
-                if (raycastHit.collider.tag == "Atravesable")
+                if (raycastHit.collider.CompareTag("Atravesable"))
                 {
                     if (directionY == 1 || raycastHit.distance == 0)
                     {

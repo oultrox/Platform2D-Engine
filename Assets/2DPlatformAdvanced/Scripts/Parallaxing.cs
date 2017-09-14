@@ -2,8 +2,8 @@
 
 public class Parallaxing : MonoBehaviour {
 
-    [SerializeField] private Transform[] backgrounds;   //Arreglo que almacena los fondos que van a ser 'parallaxeados'.   
-    [SerializeField] private float smoothing;	        //El nivel de intensidad en la que se hará el parallax.
+    [SerializeField] private Transform[] backgrounds;   //Arreglo que almacena los fondos que van a ser 'parallaxeados'.
+    [SerializeField] private float smoothing;	          //El nivel de intensidad en la que se hará el parallax.
     [SerializeField] private bool isParallaxYEnabled;   //Para habilitar el parallaxeo en coordenadas Y (opcional).
     private float[] parallaxScales;                     //La proporcion del movimiento del a camara para mover los fondos.
     private Transform cam;                              //Referencia a la Main camera
@@ -13,7 +13,7 @@ public class Parallaxing : MonoBehaviour {
     //Referencias
     private void Awake()
     {
-        cam = Camera.main.transform;   
+        cam = Camera.main.transform;
     }
 
     //Inicialización
@@ -45,10 +45,10 @@ public class Parallaxing : MonoBehaviour {
         {
             parallaxX = (previousCamPos.x - cam.position.x) * parallaxScales[i];
             parallaxY = (previousCamPos.y - cam.position.y) * parallaxScales[i];
-            
-            backgroundTargetPosX = backgrounds[i].position.x + parallaxX; 
+
+            backgroundTargetPosX = backgrounds[i].position.x + parallaxX;
             backgroundTargetPos.x = backgroundTargetPosX;
-            
+
             //Asigna el paralaje Y en caso de que esté activo vía el editor.
             if (isParallaxYEnabled)
             {
