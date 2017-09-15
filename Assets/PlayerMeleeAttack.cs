@@ -10,7 +10,7 @@ public class PlayerMeleeAttack : MonoBehaviour {
     private Transform slashChildren;
     private Animator animator;
     private SpriteRenderer playerOrientation;
-    private Controller2D playerController;
+    private PlatformMotor2D playerController;
     private float timeCounter = 0;
     
 
@@ -27,7 +27,7 @@ public class PlayerMeleeAttack : MonoBehaviour {
         animator = slashObject.GetComponent<Animator>();
         slashChildren = slashObject.transform;
         playerOrientation = this.GetComponentInParent<SpriteRenderer>();
-        playerController = this.GetComponent<Controller2D>();
+        playerController = this.GetComponent<PlatformMotor2D>();
     }
 
     private void Start()

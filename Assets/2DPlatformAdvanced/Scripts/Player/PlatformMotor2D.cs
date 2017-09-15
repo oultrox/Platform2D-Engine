@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class Controller2D : RaycastController {
+public class PlatformMotor2D : RaycastMotor2D {
 
     //Nos permite conocer la informacion de colisiones del objeto.
     public struct CollisionInfo

@@ -2,7 +2,7 @@
 
 //Motor físico basado en Raycasts.
 [RequireComponent(typeof(BoxCollider2D))]
-public class RaycastController : MonoBehaviour {
+public class RaycastMotor2D : MonoBehaviour {
     
     //Nos facilita los limites de el origen del raycast via el collider.
     public struct RaycastOrigin

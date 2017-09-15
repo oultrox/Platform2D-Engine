@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingPlatformController : RaycastController {
+public class MovingPlatformController : RaycastMotor2D {
 
     //Struct que contiene los estados de sus pasajeros.
     private struct PassengerState
@@ -33,7 +33,7 @@ public class MovingPlatformController : RaycastController {
 
     //Privates
     private List<PassengerState> passengers;     //Lista de nuestro struct
-    private Dictionary<Transform, Controller2D> dictionaryPassengers; //Diccionario utilizado para los pasajeros.
+    private Dictionary<Transform, PlatformMotor2D> dictionaryPassengers; //Diccionario utilizado para los pasajeros.
     private Vector3[] globalWayPointsPosition;  // Convierte las posiciones locales que se ven en el editor en las posiciones globales para el mov.
     private int fromWayPointIndex;              // Controla la posicion actual de la plataforma en terminos de waypoints.
     private float percentBetweenWaypoints;      // Entre 0 y 1.
@@ -44,7 +44,7 @@ public class MovingPlatformController : RaycastController {
     public override void Start ()
     {
         base.Start();
-        dictionaryPassengers = new Dictionary<Transform, Controller2D>();
+        dictionaryPassengers = new Dictionary<Transform, PlatformMotor2D>();
         globalWayPointsPosition = new Vector3[localWaypoints.Length];
         for (int i = 0; i < localWaypoints.Length; i++)
         {
@@ -126,7 +126,7 @@ public class MovingPlatformController : RaycastController {
         {
             if (!dictionaryPassengers.ContainsKey(passengers[i].transform))
             {
-                dictionaryPassengers.Add(passengers[i].transform, passengers[i].transform.GetComponent<Controller2D>());
+                dictionaryPassengers.Add(passengers[i].transform, passengers[i].transform.GetComponent<PlatformMotor2D>());
             }
             if (passengers[i].isMovingBeforePlatform == beforeMovePlatform)
             {

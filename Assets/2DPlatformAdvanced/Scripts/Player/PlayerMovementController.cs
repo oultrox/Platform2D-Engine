@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(Controller2D))]
-public class PlayerMove : MonoBehaviour
+[RequireComponent(typeof(PlatformMotor2D))]
+public class PlayerMovementController : MonoBehaviour
 {
     //Variables editables vía inspector
     public float maxJumpHeight = 4;
@@ -30,7 +30,7 @@ public class PlayerMove : MonoBehaviour
     private float horizontalInput;
     private float verticalInput;
     private Vector3 velocity;
-    private Controller2D playerController;
+    private PlatformMotor2D playerMotor;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
@@ -42,7 +42,7 @@ public class PlayerMove : MonoBehaviour
     {
         spriteRenderer = this.GetComponent<SpriteRenderer>();
         animator = this.GetComponent<Animator>();
-        playerController = this.GetComponent<Controller2D>();
+        playerMotor = this.GetComponent<PlatformMotor2D>();
     }
 
     void Start()
@@ -56,20 +56,19 @@ public class PlayerMove : MonoBehaviour
     {
         CalculateVelocity();
         HandleWallSliding();
-        playerController.Move(velocity * Time.fixedDeltaTime, verticalInput);
+        playerMotor.Move(velocity * Time.fixedDeltaTime, verticalInput);
 
         //Deten el movimiento si está en el suelo o tocando algo arriba.
-        if (playerController.collisionInfo.above || playerController.collisionInfo.below)
+        if (playerMotor.collisionInfo.above || playerMotor.collisionInfo.below)
         {
-            if (playerController.collisionInfo.isSlidingDownMaxSlope)
+            if (playerMotor.collisionInfo.isSlidingDownMaxSlope)
             {
-                velocity.y += playerController.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
+                velocity.y += playerMotor.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
             }
             else
             {
                 velocity.y = 0;
             }
-
         }
 
         //Animation stuff
@@ -78,7 +77,7 @@ public class PlayerMove : MonoBehaviour
             spriteRenderer.flipX = velocity.x < 0;
         }
 
-        animator.SetBool("grounded", playerController.collisionInfo.below);
+        animator.SetBool("grounded", playerMotor.collisionInfo.below);
         animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
     }
 
@@ -88,34 +87,34 @@ public class PlayerMove : MonoBehaviour
     {
         //Transición suave de la velocidad del jugador.
         targetVelocityX = horizontalInput * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerController.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerMotor.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
         //Gravedad
         velocity.y += gravity * Time.deltaTime;
     }
 
     private void HandleWallSliding()
     {
-        wallDirX = (playerController.collisionInfo.left) ? -1 : 1;
+        wallDirX = (playerMotor.collisionInfo.left) ? -1 : 1;
 
-        if (playerController.collisionInfo.isAbleToWallJump)
+        if (playerMotor.collisionInfo.isAbleToWallJump)
         {
             // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((playerController.collisionInfo.left && velocity.x < 0) || (playerController.collisionInfo.right && velocity.x > 0)) && !playerController.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            if (((playerMotor.collisionInfo.left && velocity.x < 0) || (playerMotor.collisionInfo.right && velocity.x > 0)) && !playerMotor.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
             {
                 //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
-                if (!playerController.collisionInfo.below)
+                if (!playerMotor.collisionInfo.below)
                 {
-                    playerController.collisionInfo.isStickedToWall = true;
+                    playerMotor.collisionInfo.isStickedToWall = true;
                 }
             }
         }
 
-        if (playerController.collisionInfo.isStickedToWall)
+        if (playerMotor.collisionInfo.isStickedToWall)
         {
             //Deslizar suavemente.
-            if (!playerController.collisionInfo.left && !playerController.collisionInfo.right)
+            if (!playerMotor.collisionInfo.left && !playerMotor.collisionInfo.right)
             {
-                playerController.collisionInfo.isStickedToWall = false;
+                playerMotor.collisionInfo.isStickedToWall = false;
             }
             if (velocity.y < -wallsSlideSpeedMax)
             {
@@ -132,7 +131,7 @@ public class PlayerMove : MonoBehaviour
                     timeWallUnstick -= Time.deltaTime;
                     if (timeWallUnstick <= 0)
                     {
-                        playerController.collisionInfo.isStickedToWall = false;
+                        playerMotor.collisionInfo.isStickedToWall = false;
                     }
                 }
                 else if (horizontalInput == wallDirX)
@@ -156,7 +155,7 @@ public class PlayerMove : MonoBehaviour
     public void JumpInputDown()
     {
         //Wall jump
-        if (playerController.collisionInfo.isStickedToWall)
+        if (playerMotor.collisionInfo.isStickedToWall)
         {
             if (wallDirX == horizontalInput)
             {
@@ -173,18 +172,18 @@ public class PlayerMove : MonoBehaviour
                 velocity.x = -wallDirX * wallLeap.x;
                 velocity.y = wallLeap.y;
             }
-            playerController.collisionInfo.isStickedToWall = false;
+            playerMotor.collisionInfo.isStickedToWall = false;
         }
 
         //Normal Jump
-        if (playerController.collisionInfo.below)
+        if (playerMotor.collisionInfo.below)
         {
-            if (playerController.collisionInfo.isSlidingDownMaxSlope)
+            if (playerMotor.collisionInfo.isSlidingDownMaxSlope)
             {
-                if (horizontalInput != -Mathf.Sign(playerController.collisionInfo.slopeNormal.x)) //not jumping against slope
+                if (horizontalInput != -Mathf.Sign(playerMotor.collisionInfo.slopeNormal.x)) //not jumping against slope
                 {
-                    velocity.y = maxJumpVelocity * playerController.collisionInfo.slopeNormal.y;
-                    velocity.x = maxJumpVelocity * playerController.collisionInfo.slopeNormal.x;
+                    velocity.y = maxJumpVelocity * playerMotor.collisionInfo.slopeNormal.y;
+                    velocity.x = maxJumpVelocity * playerMotor.collisionInfo.slopeNormal.x;
                 }
             }
             else
@@ -193,7 +192,6 @@ public class PlayerMove : MonoBehaviour
             }
         }
     }
-
 
     public void JumpInputUp()
     {

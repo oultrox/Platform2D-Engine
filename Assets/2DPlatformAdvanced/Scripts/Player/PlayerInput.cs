@@ -1,13 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-[RequireComponent  (typeof(PlayerMove))]
+
+[RequireComponent  (typeof(PlayerMovementController))]
 public class PlayerInput : MonoBehaviour {
 
-    PlayerMove playerMovement;
+    PlayerMovementController playerMovement;
+
 	// Use this for initialization
 	void Start () {
-        playerMovement = GetComponent<PlayerMove>();
+        playerMovement = GetComponent<PlayerMovementController>();
 	}
 	
 	// Update is called once per frame
