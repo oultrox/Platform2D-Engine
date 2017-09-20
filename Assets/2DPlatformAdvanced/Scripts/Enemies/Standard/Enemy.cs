@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 //Comparte todo lo que tienen en comun los enemigos.
-public class Enemy : MonoBehaviour {
+public abstract class Enemy : MonoBehaviour {
 
     [SerializeField] protected float movementSpeed = 5;
     [SerializeField] protected int enemyHP = 100;
@@ -27,6 +27,7 @@ public class Enemy : MonoBehaviour {
         return Vector2.right;
     }
 
+    public abstract void Attack();
     #region Properties
     public float MovementSpeed
     {

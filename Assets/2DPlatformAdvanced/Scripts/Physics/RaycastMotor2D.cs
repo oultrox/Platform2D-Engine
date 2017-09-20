@@ -41,10 +41,17 @@ public class RaycastMotor2D : MonoBehaviour {
         Bounds bounds = colliderObj.bounds;
         bounds.Expand(SKIN_WIDTH * -2); // esto permite que tenga un pequeño del raycast dentro del jugador, para evitar bugs.
 
-        raycastOrigen.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        raycastOrigen.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        raycastOrigen.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        raycastOrigen.topRight = new Vector2(bounds.max.x, bounds.max.y);
+        raycastOrigen.bottomLeft.x = bounds.min.x;
+        raycastOrigen.bottomLeft.y = bounds.min.y;
+
+        raycastOrigen.bottomRight.x = bounds.max.x;
+        raycastOrigen.bottomRight.y = bounds.min.y;
+
+        raycastOrigen.topLeft.x = bounds.min.x;
+        raycastOrigen.topLeft.y = bounds.max.y;
+
+        raycastOrigen.topRight.x = bounds.max.x;
+        raycastOrigen.topRight.x = bounds.max.y;
 
     }
 

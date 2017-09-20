@@ -72,13 +72,18 @@ public class GroundEnemy : Enemy {
         }
     }
 
-    public virtual void ChangeDirection()
+    public void ChangeDirection()
     {
         isFacingRight = !isFacingRight;
 
         currentRotation = enemyTransform.eulerAngles;
         currentRotation.y += 180;
         enemyTransform.eulerAngles = currentRotation;
+    }
+
+    public override void Attack()
+    {
+        Debug.Log("Atacando, soy un ground enemy!");
     }
 
 }
