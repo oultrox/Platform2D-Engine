@@ -34,8 +34,6 @@ public class PlayerMovementController : MonoBehaviour
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
-
-
     //-------Metodos API-------
     //Initialization
     private void Awake()
@@ -82,6 +80,11 @@ public class PlayerMovementController : MonoBehaviour
     }
 
     //---------Metodos custom--------
+    public void SetDirectionalInput(float inputX, float inputY)
+    {
+        horizontalInput = inputX;
+        verticalInput = inputY;
+    }
 
     private void CalculateVelocity()
     {
@@ -99,57 +102,50 @@ public class PlayerMovementController : MonoBehaviour
         if (playerMotor.collisionInfo.isAbleToWallJump)
         {
             // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((playerMotor.collisionInfo.left && velocity.x < 0) || (playerMotor.collisionInfo.right && velocity.x > 0)) && !playerMotor.collisionInfo.isSlidingDownMaxSlope /*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            if (((playerMotor.collisionInfo.left && velocity.x < 0) || (playerMotor.collisionInfo.right && velocity.x > 0)) 
+            && !playerMotor.collisionInfo.isSlidingDownMaxSlope && !playerMotor.collisionInfo.below /*&&!controller.collisionInfo.below && velocity.y < 0*/)
             {
-                //Para evitar pegarse estando en el suelo. puede ser retirable en caso de bugs.
-                if (!playerMotor.collisionInfo.below)
-                {
-                    playerMotor.collisionInfo.isStickedToWall = true;
-                }
+                 playerMotor.collisionInfo.isStickedToWall = true;
             }
         }
 
-        if (playerMotor.collisionInfo.isStickedToWall)
+        if (!playerMotor.collisionInfo.isStickedToWall)
         {
-            //Deslizar suavemente.
-            if (!playerMotor.collisionInfo.left && !playerMotor.collisionInfo.right)
-            {
-                playerMotor.collisionInfo.isStickedToWall = false;
-            }
-            if (velocity.y < -wallsSlideSpeedMax)
-            {
-                velocity.y = -wallsSlideSpeedMax;
-            }
+            return;
+        }
 
-            //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
-            if (timeWallUnstick > 0)
+        //Deslizar suavemente si está pegado a la pared.
+        if (!playerMotor.collisionInfo.left && !playerMotor.collisionInfo.right)
+        {
+            playerMotor.collisionInfo.isStickedToWall = false;
+        }
+        if (velocity.y < -wallsSlideSpeedMax)
+        {
+            velocity.y = -wallsSlideSpeedMax;
+        }
+
+        //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
+        if (timeWallUnstick > 0)
+        {
+            velocityXSmoothing = 0;
+            velocity.x = 0;
+            if (horizontalInput != wallDirX || horizontalInput == 0)
             {
-                velocityXSmoothing = 0;
-                velocity.x = 0;
-                if (horizontalInput != wallDirX || horizontalInput == 0)
+                timeWallUnstick -= Time.deltaTime;
+                if (timeWallUnstick <= 0)
                 {
-                    timeWallUnstick -= Time.deltaTime;
-                    if (timeWallUnstick <= 0)
-                    {
-                        playerMotor.collisionInfo.isStickedToWall = false;
-                    }
-                }
-                else if (horizontalInput == wallDirX)
-                {
-                    timeWallUnstick = wallStickTime;
+                    playerMotor.collisionInfo.isStickedToWall = false;
                 }
             }
-            else
+            else if (horizontalInput == wallDirX)
             {
                 timeWallUnstick = wallStickTime;
             }
         }
-    }
-
-    public void SetDirectionalInput(float inputX, float inputY)
-    {
-        horizontalInput = inputX;
-        verticalInput = inputY;
+        else
+        {
+            timeWallUnstick = wallStickTime;
+        }
     }
 
     public void JumpInputDown()
