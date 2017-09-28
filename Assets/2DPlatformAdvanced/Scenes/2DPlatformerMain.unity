@@ -633,6 +633,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHP: 100
+  GhostTime: 1
 --- !u!1 &444331438
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,6 +772,7 @@ MonoBehaviour:
   visionLayerMask:
     serializedVersion: 2
     m_Bits: 8448
+  minDistanceChase: 0.8
 --- !u!114 &483823846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2152,6 +2154,7 @@ MonoBehaviour:
   visionLayerMask:
     serializedVersion: 2
     m_Bits: 8448
+  minDistanceChase: 0.7
 --- !u!61 &1665277828
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2513,6 +2516,7 @@ MonoBehaviour:
   visionLayerMask:
     serializedVersion: 2
     m_Bits: 8448
+  minDistanceChase: 0.8
 --- !u!61 &1865094671
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2930,6 +2934,7 @@ MonoBehaviour:
   visionLayerMask:
     serializedVersion: 2
     m_Bits: 8448
+  minDistanceChase: 0.8
 --- !u!114 &2037025698
 MonoBehaviour:
   m_ObjectHideFlags: 0

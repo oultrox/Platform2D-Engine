@@ -9,6 +9,8 @@ public class GroundEnemy : Enemy {
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float visionMaxDistance = 2;
     [SerializeField] private LayerMask visionLayerMask;
+    [SerializeField] private float minDistanceChase = 0.3f;
+
     private const float VERTICAL_RAYLENGTH = 0.1f;
     private const float HORIZONTAL_RAYLENGTH = .03f;
 
@@ -35,7 +37,14 @@ public class GroundEnemy : Enemy {
     }
     //----Metodos Custom-----
 
-    private void Move()
+    private void MoveChase()
+    {
+        if (Vector2.Distance(enemyTransform.position,playerTransform.position) > minDistanceChase)
+        {
+            enemyTransform.Translate(GetMoveDirection() * (movementSpeed * Time.deltaTime));
+        }
+    }
+    private void MovePatrol()
     {
         enemyTransform.Translate(GetMoveDirection() * (movementSpeed * Time.deltaTime));
     }
@@ -89,7 +98,7 @@ public class GroundEnemy : Enemy {
             ChangeDirection();
         }
 
-        Move();
+        MovePatrol();
         Debug.DrawLine(lineCastWall, lineCastWall + (Vector2)enemyTransform.right * HORIZONTAL_RAYLENGTH);
         Debug.DrawLine(lineCastGround, lineCastGround + (Vector2.down * VERTICAL_RAYLENGTH));
     }
@@ -100,6 +109,13 @@ public class GroundEnemy : Enemy {
         {
             return;
         }
+
+        //Si la distancia es muy pequeña entonces no girar para evitar bugs.
+        if (Mathf.Abs(EnemyTransform.position.x - playerTransform.position.x) < 0.1f)
+        {
+            return;
+        }
+
         if (playerTransform.position.x < enemyTransform.position.x)
         {
             isFacingRight = false;
@@ -114,7 +130,7 @@ public class GroundEnemy : Enemy {
             currentRotation.y = 360;
             enemyTransform.eulerAngles = currentRotation;
         }
-        Move();
+        MoveChase();
     }
 
     public override bool Look()
