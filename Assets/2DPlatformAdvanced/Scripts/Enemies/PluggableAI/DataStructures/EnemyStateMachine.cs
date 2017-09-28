@@ -41,23 +41,21 @@ public class EnemyStateMachine : MonoBehaviour {
 
     public bool CheckIfCountDownElapsed(int duration)
     {
-        //Para evitar transitar a idle si la duracion es 0.
-        if (duration > 0)
-        {
-            stateTimeElapsed += Time.deltaTime;
-            isCountDownElapsed = stateTimeElapsed >= duration;
-
-            //Si pasó el tiempo, reiniciar.
-            if (isCountDownElapsed)
-            {
-                stateTimeElapsed = 0;
-            }
-            return isCountDownElapsed;
-        }
-        else
+        //Para evitar transitar si la duracion es 0.
+        if (duration <= 0)
         {
             return false;
         }
+
+        stateTimeElapsed += Time.deltaTime;
+        isCountDownElapsed = stateTimeElapsed >= duration;
+
+        //Si pasó el tiempo, reiniciar.
+        if (isCountDownElapsed)
+        {
+            stateTimeElapsed = 0;
+        }
+        return isCountDownElapsed;
     }
 
 

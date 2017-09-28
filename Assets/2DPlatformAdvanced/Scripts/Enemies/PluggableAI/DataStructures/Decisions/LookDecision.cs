@@ -8,6 +8,6 @@ public class LookDecision : Decision
 {
     public override bool Decide(EnemyStateMachine stateController)
     {
-        return false;
+        return stateController.Enemy.Look();
     }
 }

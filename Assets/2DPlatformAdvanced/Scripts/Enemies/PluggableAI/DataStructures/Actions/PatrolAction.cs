@@ -1,25 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "PluggableAI/Actions/Patrol")]
 public class PatrolAction : Action {
 
     public override void Act(EnemyStateMachine state)
     {
-        Patrol(state);
+        state.Enemy.Patrol();
     }
-
-    private void Patrol(EnemyStateMachine state)
-    {
-        Move(state);
-    }
-
-    private void Move(EnemyStateMachine state)
-    {
-        state.Enemy.EnemyTransform.Translate(state.Enemy.GetMoveDirection() * (state.Enemy.MovementSpeed * Time.deltaTime));
-    }
-
-    
 }

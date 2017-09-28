@@ -10,6 +10,7 @@ public abstract class Enemy : MonoBehaviour {
     [SerializeField] protected int enemyHP = 100;
     [SerializeField] protected int touchDamage = 10;
     [SerializeField] protected int idleDuration = 7;
+    [SerializeField] private int chaseOutDuration = 4;
     protected Transform enemyTransform;
     protected Animator animator;
     protected BoxCollider2D hitbox;
@@ -28,6 +29,9 @@ public abstract class Enemy : MonoBehaviour {
     }
 
     public abstract void Attack();
+    public abstract void Chase();
+    public abstract void Patrol();
+    public abstract bool Look();
     #region Properties
     public float MovementSpeed
     {
@@ -104,6 +108,19 @@ public abstract class Enemy : MonoBehaviour {
         set
         {
             idleDuration = value;
+        }
+    }
+
+    public int ChaseOutDuration
+    {
+        get
+        {
+            return chaseOutDuration;
+        }
+
+        set
+        {
+            chaseOutDuration = value;
         }
     }
     #endregion
