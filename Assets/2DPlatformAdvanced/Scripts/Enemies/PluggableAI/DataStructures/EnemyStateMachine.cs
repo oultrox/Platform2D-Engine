@@ -10,7 +10,6 @@ public class EnemyStateMachine : MonoBehaviour {
     [SerializeField] private State remainState;
     private Enemy enemy;
     private bool aiActive;
-    private bool isCountDownElapsed;
     private float stateTimeElapsed;
 
     //----Metodos API-----
@@ -18,7 +17,6 @@ public class EnemyStateMachine : MonoBehaviour {
     {
         enemy = this.GetComponent<Enemy>();
         aiActive = true;
-        isCountDownElapsed = false;
         stateTimeElapsed = 0;
     }
 
@@ -36,6 +34,7 @@ public class EnemyStateMachine : MonoBehaviour {
         if (nextState != remainState)
         {
             currentState = nextState;
+            stateTimeElapsed = 0;
         }
     }
 
@@ -48,13 +47,7 @@ public class EnemyStateMachine : MonoBehaviour {
         }
 
         stateTimeElapsed += Time.deltaTime;
-        isCountDownElapsed = stateTimeElapsed >= duration;
-
-        //Si pasó el tiempo, reiniciar.
-        if (isCountDownElapsed)
-        {
-            stateTimeElapsed = 0;
-        }
+        bool isCountDownElapsed = stateTimeElapsed >= duration;
         return isCountDownElapsed;
     }
 
