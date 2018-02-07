@@ -2138,6 +2138,18 @@ Prefab:
       propertyPath: m_LocalScale.y
       value: 2.668837
       objectReference: {fileID: 0}
+    - target: {fileID: 4563135336853526, guid: cefdc9cb5c29254498f8928fb68d283c, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0.23745285
+      objectReference: {fileID: 0}
+    - target: {fileID: 4563135336853526, guid: cefdc9cb5c29254498f8928fb68d283c, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 0.97139907
+      objectReference: {fileID: 0}
+    - target: {fileID: 4563135336853526, guid: cefdc9cb5c29254498f8928fb68d283c, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -27.473001
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: cefdc9cb5c29254498f8928fb68d283c, type: 2}
   m_IsPrefabParent: 0
