@@ -54,7 +54,7 @@ public class PlayerMovementController : MonoBehaviour
     {
         CalculateVelocity();
         HandleWallSliding();
-        playerMotor.Move(velocity * Time.fixedDeltaTime, verticalInput);
+        playerMotor.Move(velocity * Time.deltaTime, verticalInput);
 
         //Deten el movimiento si está en el suelo o tocando algo arriba.
         if (playerMotor.collisionInfo.above || playerMotor.collisionInfo.below)

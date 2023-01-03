@@ -36,7 +36,7 @@ public class CameraFollower : MonoBehaviour
         }
         Vector3 targetPos = target.position;
         targetPos.z = cameraTransform.position.z;
-        cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPos, smoothness);
+        cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetPos, smoothness * Time.deltaTime);
     }
 
     public void Activate(bool _isActive)
