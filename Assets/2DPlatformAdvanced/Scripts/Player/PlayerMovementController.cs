@@ -18,12 +18,11 @@ public class PlayerMovementController : MonoBehaviour
     public Vector2 wallJumpOff;
     public Vector2 wallLeap;
 
-    //Variables privadas.
     private int wallDirX;
     private float timeWallUnstick;
     private float maxJumpVelocity;
     private float minJumpVelocity;
-    private float gravity; //Antes era -20, ahora es seteado en base a la altura del salto.
+    private float gravity;
 
     private float targetVelocityX;
     private float velocityXSmoothing;
