@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour {
-
+public class PlayerHealth : MonoBehaviour 
+{
     [SerializeField] private int playerHP;
     [SerializeField] private float GhostTime = 1;
     private SpriteRenderer sprite;
@@ -30,7 +28,6 @@ public class PlayerHealth : MonoBehaviour {
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        
         if (collision.CompareTag("Enemy") && !isFlashing)
         {
             Debug.Log("Me encontró! °.°");

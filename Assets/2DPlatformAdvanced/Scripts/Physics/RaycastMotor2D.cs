@@ -1,20 +1,22 @@
 ﻿using UnityEngine;
 
-//Motor físico basado en Raycasts.
+/// <summary>
+/// Physics motor based on raycasts. Used to extend either our player controllers or movable objects in the game.
+/// </summary>
 [RequireComponent(typeof(BoxCollider2D))]
 public class RaycastMotor2D : MonoBehaviour {
-    
-    //Nos facilita los limites de el origen del raycast via el collider.
-    public struct RaycastOrigin
+
+    // Helps define the edges of the raycast origin based on the collider.
+    protected struct RaycastOrigin
     {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
     }
 
-    //Variables editables vía editor
+    // Editable variables via Inspector
     public LayerMask collisionMask;
 
-    //Heredado
+    // Inherited constants
     protected const float SKIN_WIDTH = 0.015f;
     protected const float DISTANCE_BETWEEN_RAYS = 0.1f;
 
@@ -24,9 +26,8 @@ public class RaycastMotor2D : MonoBehaviour {
     protected float verticalRaySpacing;
 
     protected BoxCollider2D colliderObj;
-    protected RaycastOrigin raycastOrigen;
+    protected RaycastOrigin raycastOrigin;
     private Bounds _bounds;
-
 
     public virtual void Start()
     {
@@ -34,37 +35,36 @@ public class RaycastMotor2D : MonoBehaviour {
         CalculateRaySpacing();
     }
 
-    //Actualiza las lineas del raycast del origen en base al grosor del collider del jugador.
-    public void UpdateRaycastOrigins()
+    // Updates the positions of the raycast origins based on the collider size.
+    protected void UpdateRaycastOrigins()
     {
         _bounds = colliderObj.bounds;
-        _bounds.Expand(SKIN_WIDTH * -2); // esto permite que tenga un pequeño del raycast dentro del jugador, para evitar bugs.
+        _bounds.Expand(SKIN_WIDTH * -2); // Shrinks bounds slightly to inset raycasts and prevent bugs.
 
-        raycastOrigen.bottomLeft.x = _bounds.min.x;
-        raycastOrigen.bottomLeft.y = _bounds.min.y;
+        raycastOrigin.bottomLeft.x = _bounds.min.x;
+        raycastOrigin.bottomLeft.y = _bounds.min.y;
 
-        raycastOrigen.bottomRight.x = _bounds.max.x;
-        raycastOrigen.bottomRight.y = _bounds.min.y;
+        raycastOrigin.bottomRight.x = _bounds.max.x;
+        raycastOrigin.bottomRight.y = _bounds.min.y;
 
-        raycastOrigen.topLeft.x = _bounds.min.x;
-        raycastOrigen.topLeft.y = _bounds.max.y;
+        raycastOrigin.topLeft.x = _bounds.min.x;
+        raycastOrigin.topLeft.y = _bounds.max.y;
 
-        raycastOrigen.topRight.x = _bounds.max.x;
-        raycastOrigen.topRight.x = _bounds.max.y;
-
+        raycastOrigin.topRight.x = _bounds.max.x;
+        raycastOrigin.topRight.y = _bounds.max.y;
     }
 
-    //calcula el espacio entre las lineas del raycasting. se hace 1 sóla vez.
+    // Calculates the spacing between raycast lines. Done only once.
     private void CalculateRaySpacing()
     {
         _bounds = colliderObj.bounds;
         _bounds.Expand(SKIN_WIDTH * -2); 
 
-        //Consigue el ancho y largo del collider.
+        // Get the width and height of the collider.
         float boundsWidth = _bounds.size.x;
         float boundsHeight = _bounds.size.y;
 
-        //Setea el numero de raycast que debe lanzar en base el espaciado del lado contrario entre la distancia entre ellos.
+        // Set the number of rays to cast based on the spacing along the opposite side.
         horizontalRayCount = Mathf.RoundToInt(boundsHeight / DISTANCE_BETWEEN_RAYS);
         verticalRayCount = Mathf.RoundToInt(boundsWidth / DISTANCE_BETWEEN_RAYS);
 

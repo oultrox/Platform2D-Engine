@@ -112,7 +112,7 @@ public class PlatformMotor2D : RaycastMotor2D
         // Similar system to vertical checks, but adapted for slope handling.
         for (int i = 0; i < horizontalRayCount; i++)
         {
-            Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight;
+            Vector2 rayOrigin = (directionX == -1) ? raycastOrigin.bottomLeft : raycastOrigin.bottomRight;
             rayOrigin += Vector2.up * (horizontalRaySpacing * i);
             RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
             Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
@@ -187,7 +187,7 @@ public class PlatformMotor2D : RaycastMotor2D
         // Cast vertical rays to detect collisions above/below.
         for (int i = 0; i < verticalRayCount; i++)
         {
-            rayOrigin = (directionY == -1) ? raycastOrigen.bottomLeft : raycastOrigen.topLeft;
+            rayOrigin = (directionY == -1) ? raycastOrigin.bottomLeft : raycastOrigin.topLeft;
             rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
 
             raycastHit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
@@ -241,7 +241,7 @@ public class PlatformMotor2D : RaycastMotor2D
 
         float directionX = Mathf.Sign(moveAmount.x);
         rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
-        rayOrigin = ((directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight) + Vector2.up * moveAmount.y;
+        rayOrigin = ((directionX == -1) ? raycastOrigin.bottomLeft : raycastOrigin.bottomRight) + Vector2.up * moveAmount.y;
         raycastHit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
         if (!raycastHit)
         {
@@ -283,8 +283,8 @@ public class PlatformMotor2D : RaycastMotor2D
     
     private void DescendSlope(ref Vector2 moveAmount)
     {
-        RaycastHit2D maxSlopeHitLeft = Physics2D.Raycast(raycastOrigen.bottomLeft, Vector2.down, Mathf.Abs(moveAmount.y) + SKIN_WIDTH, collisionMask);
-        RaycastHit2D maxSlopeHitRight = Physics2D.Raycast(raycastOrigen.bottomRight, Vector2.down, Mathf.Abs(moveAmount.y) + SKIN_WIDTH, collisionMask);
+        RaycastHit2D maxSlopeHitLeft = Physics2D.Raycast(raycastOrigin.bottomLeft, Vector2.down, Mathf.Abs(moveAmount.y) + SKIN_WIDTH, collisionMask);
+        RaycastHit2D maxSlopeHitRight = Physics2D.Raycast(raycastOrigin.bottomRight, Vector2.down, Mathf.Abs(moveAmount.y) + SKIN_WIDTH, collisionMask);
         SlideDownMaxSlope(maxSlopeHitLeft, ref moveAmount);
         SlideDownMaxSlope(maxSlopeHitRight, ref moveAmount);
 
@@ -295,7 +295,7 @@ public class PlatformMotor2D : RaycastMotor2D
 
         // Handle normal slope descent
         float directionX = Mathf.Sign(moveAmount.x);
-        Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomRight : raycastOrigen.bottomLeft;
+        Vector2 rayOrigin = (directionX == -1) ? raycastOrigin.bottomRight : raycastOrigin.bottomLeft;
         RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
         if (!raycastHit)
         {
