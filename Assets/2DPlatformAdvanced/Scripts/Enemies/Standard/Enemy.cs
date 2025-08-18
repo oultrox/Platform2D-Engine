@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//Comparte todo lo que tienen en comun los enemigos.
+// Enemy skeleton to use for our polymorphism.
 public abstract class Enemy : MonoBehaviour {
 
     [SerializeField] protected float movementSpeed = 5;

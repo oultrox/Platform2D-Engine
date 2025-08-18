@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-//Enemigo terrestre.
-public class GroundEnemy : Enemy {
-    
+public class GroundEnemy : Enemy 
+{
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float visionMaxDistance = 2;
     [SerializeField] private LayerMask visionLayerMask;
@@ -23,7 +19,7 @@ public class GroundEnemy : Enemy {
     private bool isTouchingWall = false;
     private Transform playerTransform;
 
-    //----Metodos API-----
+
     public override void Awake()
     {
         base.Awake();
@@ -35,8 +31,7 @@ public class GroundEnemy : Enemy {
         CheckGround();
         CheckWalls();
     }
-    //----Metodos Custom-----
-
+    
     private void MoveChase()
     {
         if (Vector2.Distance(enemyTransform.position,playerTransform.position) > minDistanceChase)
@@ -81,16 +76,7 @@ public class GroundEnemy : Enemy {
             isTouchingWall = Physics2D.Linecast(lineCastWall, lineCastWall + ((Vector2)enemyTransform.right * HORIZONTAL_RAYLENGTH), groundLayer);
         }
     }
-
-    public void ChangeDirection()
-    {
-        isFacingRight = !isFacingRight;
-
-        currentRotation = enemyTransform.eulerAngles;
-        currentRotation.y += 180;
-        enemyTransform.eulerAngles = currentRotation;
-    }
-
+    
     public override void Patrol()
     {
         if (!isGrounded || isTouchingWall)
@@ -110,7 +96,7 @@ public class GroundEnemy : Enemy {
             return;
         }
 
-        //Si la distancia es muy pequeña entonces no girar para evitar bugs.
+        //Avoid flickering this way.
         if (Mathf.Abs(EnemyTransform.position.x - playerTransform.position.x) < 0.1f)
         {
             return;
@@ -141,7 +127,7 @@ public class GroundEnemy : Enemy {
         startPositon.y = hitbox.bounds.max.y * 0.98f;
         hit = Physics2D.Linecast(startPositon, startPositon + ((Vector2)enemyTransform.right * visionMaxDistance), visionLayerMask);
 
-        //Editor Only
+        //Debug Only
         Debug.DrawLine(startPositon, startPositon + ((Vector2)enemyTransform.right * visionMaxDistance), Color.blue);
 
         if (hit && hit.collider.CompareTag("Player"))
@@ -152,8 +138,16 @@ public class GroundEnemy : Enemy {
         {
             return false;
         }
-        
     }
 
     public override void Attack(){}
+    
+    void ChangeDirection()
+    {
+        isFacingRight = !isFacingRight;
+
+        currentRotation = enemyTransform.eulerAngles;
+        currentRotation.y += 180;
+        enemyTransform.eulerAngles = currentRotation;
+    }
 }
