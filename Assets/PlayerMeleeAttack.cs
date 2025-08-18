@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerMeleeAttack : MonoBehaviour {
 
     [SerializeField] private float timeBetweenAttacks;
@@ -12,14 +11,14 @@ public class PlayerMeleeAttack : MonoBehaviour {
     private SpriteRenderer playerOrientation;
     private PlatformMotor2D playerController;
     private float timeCounter = 0;
+    private float debuggerTime;
+    private PlayerInput playerInput;
     
-
-    //--------Métodos API--------
     private void Awake()
     {
         foreach (Transform child in transform)
         {
-            if (child.tag == "Slash")
+            if (child.CompareTag("Slash"))
             {
                 slashObject = child.gameObject;
             }
@@ -28,6 +27,7 @@ public class PlayerMeleeAttack : MonoBehaviour {
         slashChildren = slashObject.transform;
         playerOrientation = this.GetComponentInParent<SpriteRenderer>();
         playerController = this.GetComponent<PlatformMotor2D>();
+        playerInput = this.GetComponent<PlayerInput>();
     }
 
     private void Start()
@@ -37,8 +37,13 @@ public class PlayerMeleeAttack : MonoBehaviour {
 
     private void Update()
     {
+        GetAttackInput();
+    }
+
+    private void GetAttackInput()
+    {
         timeCounter += Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.J))
+        if(playerInput.Attacked)
         {
             if (timeCounter >= timeBetweenAttacks && !playerController.collisionInfo.isStickedToWall)
             {
@@ -48,7 +53,6 @@ public class PlayerMeleeAttack : MonoBehaviour {
         }
     }
 
-    private float debuggerTime;
     IEnumerator Slash()
     {
         slashObject.SetActive(true);

@@ -1,19 +1,20 @@
 ﻿using UnityEngine;
 
 [RequireComponent(typeof(PlatformMotor2D))]
+[RequireComponent(typeof(PlayerInput))]
 public class PlayerMovementController : MonoBehaviour
 {
-    //Variables editables vía inspector
+    [Header("Movement Settings")]
     public float maxJumpHeight = 4;
     public float minJumpHeight = 1;
-
     public float timeToJumpApex = 0.4f;
     public float moveSpeed = 6;
     public float accelerationOnGround = 0.03f;
     public float accelerationOnAir = 0.1f;
+
+    [Header("Wall Settings")]
     public float wallsSlideSpeedMax = 3;
     public float wallStickTime = 0.25f;
-
     public Vector2 wallJumpClimb;
     public Vector2 wallJumpOff;
     public Vector2 wallLeap;
@@ -26,23 +27,23 @@ public class PlayerMovementController : MonoBehaviour
 
     private float targetVelocityX;
     private float velocityXSmoothing;
-    private float horizontalInput;
-    private float verticalInput;
     private Vector3 velocity;
+
+    // Components
     private PlatformMotor2D playerMotor;
+    private PlayerInput playerInput;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
 
-    //-------Metodos API-------
-    //Initialization
     private void Awake()
     {
-        spriteRenderer = this.GetComponent<SpriteRenderer>();
-        animator = this.GetComponent<Animator>();
-        playerMotor = this.GetComponent<PlatformMotor2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+        playerMotor = GetComponent<PlatformMotor2D>();
+        playerInput = GetComponent<PlayerInput>();
     }
 
-    void Start()
+    private void Start()
     {
         gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
@@ -51,46 +52,31 @@ public class PlayerMovementController : MonoBehaviour
 
     private void Update()
     {
-        CalculateVelocity();
+        HandleMovement();
         HandleWallSliding();
-        playerMotor.Move(velocity * Time.deltaTime, verticalInput);
+        HandleJumping();
 
-        //Deten el movimiento si está en el suelo o tocando algo arriba.
-        if (playerMotor.collisionInfo.above || playerMotor.collisionInfo.below)
-        {
-            if (playerMotor.collisionInfo.isSlidingDownMaxSlope)
-            {
-                velocity.y += playerMotor.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
-            }
-            else
-            {
-                velocity.y = 0;
-            }
-        }
+        playerMotor.Move(velocity * Time.deltaTime, playerInput.MoveInput.y);
 
-        //Animation stuff
-        if (velocity.x != 0)
-        {
-            spriteRenderer.flipX = velocity.x < 0;
-        }
+        HandleCollisions();
+        HandleAnimations();
 
-        animator.SetBool("grounded", playerMotor.collisionInfo.below);
-        animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
+        // consume one-shot inputs so they don’t get reused this frame
+        playerInput.ConsumeJumpInputs();
     }
 
-    //---------Metodos custom--------
-    public void SetDirectionalInput(float inputX, float inputY)
+    private void HandleMovement()
     {
-        horizontalInput = inputX;
-        verticalInput = inputY;
-    }
-
-    private void CalculateVelocity()
-    {
-        //Transición suave de la velocidad del jugador.
+        float horizontalInput = playerInput.MoveInput.x;
         targetVelocityX = horizontalInput * moveSpeed;
-        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (playerMotor.collisionInfo.below) ? accelerationOnGround : accelerationOnAir);
-        //Gravedad
+        velocity.x = Mathf.SmoothDamp(
+            velocity.x,
+            targetVelocityX,
+            ref velocityXSmoothing,
+            (playerMotor.collisionInfo.below ? accelerationOnGround : accelerationOnAir)
+        );
+
+        // Apply gravity
         velocity.y += gravity * Time.deltaTime;
     }
 
@@ -100,41 +86,36 @@ public class PlayerMovementController : MonoBehaviour
 
         if (playerMotor.collisionInfo.isAbleToWallJump)
         {
-            // WALL SLIDING  - comentada la última condición para hacer más fluido el wall jumping continuo.
-            if (((playerMotor.collisionInfo.left && velocity.x < 0) || (playerMotor.collisionInfo.right && velocity.x > 0)) 
-            && !playerMotor.collisionInfo.isSlidingDownMaxSlope && !playerMotor.collisionInfo.below /*&&!controller.collisionInfo.below && velocity.y < 0*/)
+            if (((playerMotor.collisionInfo.left && velocity.x < 0) ||
+                (playerMotor.collisionInfo.right && velocity.x > 0)) &&
+                !playerMotor.collisionInfo.isSlidingDownMaxSlope &&
+                !playerMotor.collisionInfo.below)
             {
-                 playerMotor.collisionInfo.isStickedToWall = true;
+                playerMotor.collisionInfo.isStickedToWall = true;
             }
         }
 
         if (!playerMotor.collisionInfo.isStickedToWall)
-        {
             return;
-        }
 
-        //Deslizar suavemente si está pegado a la pared.
         if (!playerMotor.collisionInfo.left && !playerMotor.collisionInfo.right)
-        {
             playerMotor.collisionInfo.isStickedToWall = false;
-        }
-        if (velocity.y < -wallsSlideSpeedMax)
-        {
-            velocity.y = -wallsSlideSpeedMax;
-        }
 
-        //Si su input es distinto a la direccion donde está pegado, soltar despues de determinado tiempo.
+        if (velocity.y < -wallsSlideSpeedMax)
+            velocity.y = -wallsSlideSpeedMax;
+
+        float horizontalInput = playerInput.MoveInput.x;
+
         if (timeWallUnstick > 0)
         {
             velocityXSmoothing = 0;
             velocity.x = 0;
+
             if (horizontalInput != wallDirX || horizontalInput == 0)
             {
                 timeWallUnstick -= Time.deltaTime;
                 if (timeWallUnstick <= 0)
-                {
                     playerMotor.collisionInfo.isStickedToWall = false;
-                }
             }
             else if (horizontalInput == wallDirX)
             {
@@ -147,9 +128,20 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
-    public void JumpInputDown()
+    private void HandleJumping()
     {
-        //Wall jump
+        if (playerInput.JumpPressed)
+            JumpRelease();
+
+        if (playerInput.JumpReleased)
+            JumpUp();
+    }
+
+    void JumpRelease()
+    {
+        float horizontalInput = playerInput.MoveInput.x;
+
+        // Wall jump
         if (playerMotor.collisionInfo.isStickedToWall)
         {
             if (wallDirX == horizontalInput)
@@ -170,12 +162,12 @@ public class PlayerMovementController : MonoBehaviour
             playerMotor.collisionInfo.isStickedToWall = false;
         }
 
-        //Normal Jump
+        // Normal jump
         if (playerMotor.collisionInfo.below)
         {
             if (playerMotor.collisionInfo.isSlidingDownMaxSlope)
             {
-                if (horizontalInput != -Mathf.Sign(playerMotor.collisionInfo.slopeNormal.x)) //not jumping against slope
+                if (horizontalInput != -Mathf.Sign(playerMotor.collisionInfo.slopeNormal.x))
                 {
                     velocity.y = maxJumpVelocity * playerMotor.collisionInfo.slopeNormal.y;
                     velocity.x = maxJumpVelocity * playerMotor.collisionInfo.slopeNormal.x;
@@ -188,13 +180,33 @@ public class PlayerMovementController : MonoBehaviour
         }
     }
 
-    public void JumpInputUp()
+    void JumpUp()
     {
-        //Al soltar el espacio, si la velocidad Y es mayor al a minima, setearla, esto es para el jump sustain.
         if (velocity.y > minJumpVelocity)
-        {
             velocity.y = minJumpVelocity;
+    }
+
+    private void HandleCollisions()
+    {
+        if (playerMotor.collisionInfo.above || playerMotor.collisionInfo.below)
+        {
+            if (playerMotor.collisionInfo.isSlidingDownMaxSlope)
+            {
+                velocity.y += playerMotor.collisionInfo.slopeNormal.y * -gravity * Time.deltaTime;
+            }
+            else
+            {
+                velocity.y = 0;
+            }
         }
     }
 
+    private void HandleAnimations()
+    {
+        if (velocity.x != 0)
+            spriteRenderer.flipX = velocity.x < 0;
+
+        animator.SetBool("grounded", playerMotor.collisionInfo.below);
+        animator.SetFloat("velocityX", Mathf.Abs(targetVelocityX));
+    }
 }

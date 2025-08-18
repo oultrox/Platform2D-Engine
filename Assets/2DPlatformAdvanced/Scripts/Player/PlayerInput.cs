@@ -1,29 +1,34 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-[RequireComponent  (typeof(PlayerMovementController))]
-public class PlayerInput : MonoBehaviour {
+/// <summary>
+/// Old Input system that can be used for other components to read abstracted input data.
+/// </summary>
+public class PlayerInput : MonoBehaviour
+{
+    public Vector2 MoveInput { get; private set; }
+    public bool JumpPressed { get; private set; }
+    public bool JumpReleased { get; private set; }
+    public bool Attacked { get; private set; }
+    
+    private void Update()
+    {
+        GetInputValues();
+    }
 
-    PlayerMovementController playerMovement;
+    private void GetInputValues()
+    {
+        MoveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        JumpPressed = Input.GetKeyDown(KeyCode.Space);
+        JumpReleased = Input.GetKeyUp(KeyCode.Space);
+        Attacked = Input.GetKeyDown(KeyCode.J);
+    }
 
-	// Use this for initialization
-	void Start () {
-        playerMovement = GetComponent<PlayerMovementController>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        playerMovement.SetDirectionalInput(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            playerMovement.JumpInputDown();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            playerMovement.JumpInputUp();
-        }
+    /// <summary>
+    /// Optional helper to "consume" one-time inputs (so other scripts don't re-trigger them)
+    /// </summary>
+    public void ConsumeJumpInputs()
+    {
+        JumpPressed = false;
+        JumpReleased = false;
     }
 }

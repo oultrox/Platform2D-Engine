@@ -3,25 +3,24 @@ using UnityEngine;
 
 public class PlatformMotor2D : RaycastMotor2D
 {
-
-    //Nos permite conocer la informacion de colisiones del objeto.
+    // Stores collision state information of the object.
     public struct CollisionInfo
     {
-        //Controlan por donde colisiona el player con sus raycasts.
+        // Track collisions around the player using raycasts.
         public bool above, below;
         public bool left, right;
 
-        //Wall jump
+        // Wall jump support
         public bool isAbleToWallJump;
         public bool isStickedToWall;
 
-        //Slopes
+        // Slopes
         public bool isClimbingSlope;
         public bool isDescendingSlope;
         public bool isSlidingDownMaxSlope;
         public float slopeAngle, slopeAngleOld;
 
-        //Direccion hacia donde mira el movimiento del jugador
+        // Direction the player is facing based on movement
         public int faceDir;
 
         public Vector2 velocityOld;
@@ -43,24 +42,18 @@ public class PlatformMotor2D : RaycastMotor2D
             slopeNormal = Vector2.zero;
         }
     }
-
-    //Variables editables via inspector
+    
     public float maxSlopeAngle = 80;
     public CollisionInfo collisionInfo;
-    //Cached variables
     private float playerVerticalInput;
-
-
-    //----------Metodos API----------
-    //Inicialización
+    
+    
     public override void Start()
     {
         base.Start();
         collisionInfo.faceDir = 1;
     }
-
-    //----------Metodos custom----------
-    //Metodo de movimiento y sus sobrecargas.
+    
     public void Move(Vector2 moveAmount, bool standingOnPlatform = false)
     {
         Move(moveAmount, 0f, standingOnPlatform);
@@ -68,12 +61,12 @@ public class PlatformMotor2D : RaycastMotor2D
 
     public void Move(Vector2 moveAmount, float input, bool standingOnPlatform = false)
     {
-        //Actualiza y resetea cada frame.
+        // Update and reset each frame.
         UpdateRaycastOrigins();
         collisionInfo.Reset();
         collisionInfo.velocityOld = moveAmount;
 
-        //Se usa para atravesar las plataformas.
+        // Used for passing through platforms.
         playerVerticalInput = input;
 
         if (moveAmount.y < 0)
@@ -86,24 +79,27 @@ public class PlatformMotor2D : RaycastMotor2D
             collisionInfo.faceDir = (int)Mathf.Sign(moveAmount.x);
         }
 
-        HorizontalCollisions(ref moveAmount);
+        CheckHorizontalCollisions(ref moveAmount);
 
         if (moveAmount.y != 0)
         {
-            VerticalCollisions(ref moveAmount);
+            CheckVerticalCollisions(ref moveAmount);
         }
 
         transform.Translate(moveAmount);
 
-        //Condiciona el estado de colisión del objeto si está parado en alguna plataforma.
+        // Marks the object as standing on a platform if specified.
         if (standingOnPlatform)
         {
             collisionInfo.below = true;
         }
     }
 
-    //Se chequea las colisiones verticales y horizontales de manera separada para hacer más preciso la calculación en rampas y superficies.
-    private void HorizontalCollisions(ref Vector2 moveAmount)
+    /// <summary>
+    /// Checks horizontal and vertical collisions separately for more precise slope/ground calculations.
+    /// </summary>
+    /// <param name="moveAmount"></param>
+    private void CheckHorizontalCollisions(ref Vector2 moveAmount)
     {
         float directionX = collisionInfo.faceDir;
         float rayLength = Mathf.Abs(moveAmount.x) + SKIN_WIDTH;
@@ -113,7 +109,7 @@ public class PlatformMotor2D : RaycastMotor2D
             rayLength = 2 * SKIN_WIDTH;
         }
 
-        //Sistema similar al vertical solo que aquí condicionamos el movimiento en rampas.
+        // Similar system to vertical checks, but adapted for slope handling.
         for (int i = 0; i < horizontalRayCount; i++)
         {
             Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomLeft : raycastOrigen.bottomRight;
@@ -126,30 +122,30 @@ public class PlatformMotor2D : RaycastMotor2D
                 continue;
             }
 
-            //Checking si el muro con el cual está colisionando es escalable.
+            // Check if the wall is climbable (wall jump allowed).
             if (raycastHit.collider.CompareTag("Escalable"))
             {
                 collisionInfo.isAbleToWallJump = true;
             }
 
-            //Checking si está dentro de un obstaculo en movimiento, que no le dificulte moverse saliendo de la iteración.
+            // Skip if colliding with a moving obstacle at distance 0 to allow smooth exit.
             if (raycastHit.distance == 0)
             {
                 continue;
             }
 
-            //Para tomar las rampas de manera correcta, consigue el angulo de la normal y pregunta si cumple con el minimo de empinación
+            // Handle slope climbing: check angle of surface and compare with slope limits.
             float slopeAngle = Vector2.Angle(raycastHit.normal, Vector2.up);
             if (i == 0 && slopeAngle <= maxSlopeAngle)
             {
-                //Si está descendiendo aplicar la velocidad antigua que tenía.
+                // Reset descending state when transitioning onto a climbable slope.
                 if (collisionInfo.isDescendingSlope)
                 {
                     collisionInfo.isDescendingSlope = false;
                     moveAmount = collisionInfo.velocityOld;
                 }
 
-                //Si entramos a una nueva rampa, reduce el movimiento en X.
+                // Adjust movement when entering a new slope.
                 float distanceToSlopeStart = 0;
                 if (slopeAngle != collisionInfo.slopeAngleOld)
                 {
@@ -157,18 +153,18 @@ public class PlatformMotor2D : RaycastMotor2D
                     moveAmount.x -= distanceToSlopeStart * directionX;
                 }
 
-                //Sube los slops en movimiento horizontal.
+                // Apply climbing movement.
                 ClimbSlope(ref moveAmount, slopeAngle, raycastHit.normal);
                 moveAmount.x += distanceToSlopeStart * directionX;
             }
 
-            //Aplica movimiento horizontal con sus raycasts directo si no está escalando rampas.
+            // Apply horizontal collisions when not climbing or slope is too steep.
             if (!collisionInfo.isClimbingSlope || slopeAngle > maxSlopeAngle)
             {
                 moveAmount.x = (raycastHit.distance - SKIN_WIDTH) * directionX;
                 rayLength = raycastHit.distance;
 
-                //Corrige las colisiones de lado actualizando el movimiento en Y (Si es que está escalando).
+                // Correct vertical movement when climbing.
                 if (collisionInfo.isClimbingSlope)
                 {
                     moveAmount.y = Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveAmount.x);
@@ -181,20 +177,19 @@ public class PlatformMotor2D : RaycastMotor2D
         }
     }
 
-    private void VerticalCollisions(ref Vector2 moveAmount)
+    private void CheckVerticalCollisions(ref Vector2 moveAmount)
     {
         float directionY = Mathf.Sign(moveAmount.y);
         float rayLength = Mathf.Abs(moveAmount.y) + SKIN_WIDTH;
         Vector2 rayOrigin;
         RaycastHit2D raycastHit;
 
-        //Por la cantidad de los rayos necesarios verticales, lanzará los raycast para preguntar si colisionó con algo.
+        // Cast vertical rays to detect collisions above/below.
         for (int i = 0; i < verticalRayCount; i++)
         {
             rayOrigin = (directionY == -1) ? raycastOrigen.bottomLeft : raycastOrigen.topLeft;
             rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
 
-            //BEAM! Lanza el rayo que es el que contiene la colisión que se condicionará dependiendo de lo que pegó.
             raycastHit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 
             Debug.DrawRay(rayOrigin, Vector2.up * directionY, Color.red);
@@ -203,7 +198,7 @@ public class PlatformMotor2D : RaycastMotor2D
             {
                 continue;
             }
-            //Almacena el collider para atravesar plataformas habilitadas.
+            // Handle passthrough platforms.
             if (raycastHit.collider.CompareTag("Atravesable"))
             {
                 if (directionY == 1 || raycastHit.distance == 0)
@@ -211,7 +206,7 @@ public class PlatformMotor2D : RaycastMotor2D
                     continue;
                 }
 
-                //Si oprime hacia abajo, atravesar.
+                // Allow descending through platform when pressing down.
                 if (playerVerticalInput == -1)
                 {
                     if (collisionInfo.platformStanding.Equals(raycastHit.collider))
@@ -221,20 +216,20 @@ public class PlatformMotor2D : RaycastMotor2D
                     collisionInfo.platformStanding = raycastHit.collider;
                 }
             }
-            //Almacena la informacion del collider con el que colisiona para preguntar si es el collider con el que se puede bajar.
+            // Store reference to standing platform collider.
             collisionInfo.platformStanding = raycastHit.collider;
 
-            //Aplica el movimiento vertical a base del a distancia del hit del raycast y la dirección vertical (directionY)
+            // Apply vertical adjustment.
             moveAmount.y = (raycastHit.distance - SKIN_WIDTH) * directionY;
             rayLength = raycastHit.distance;
 
-            //Corrige las colisiones de arriba actualizando el movimiento en X (Si es que está escalando).
+            // Correct horizontal movement when climbing.
             if (collisionInfo.isClimbingSlope)
             {
                 moveAmount.x = moveAmount.y / Mathf.Tan(collisionInfo.slopeAngle * Mathf.Deg2Rad) * Math.Sign(moveAmount.x);
             }
 
-            //Condiciona sus estados de si está tocando por abajo o por arriba en base a la dirección vertical.
+            // Update collision state above/below.
             collisionInfo.below = directionY == -1;
             collisionInfo.above = directionY == 1;
         }
@@ -253,11 +248,10 @@ public class PlatformMotor2D : RaycastMotor2D
             return;
         }
 
-        //Actualiza el movimiento en caso de que haya pegado el raycast y entre a un nuevo slope.
+        // Correct movement when transitioning between slopes.
         float slopeAngle = Vector2.Angle(raycastHit.normal, Vector2.up);
         if (slopeAngle != collisionInfo.slopeAngle)
         {
-            //Corrige el movimiento en interseccinoes de rampas.
             moveAmount.x = (raycastHit.distance - SKIN_WIDTH) * directionX;
             collisionInfo.slopeAngle = slopeAngle;
             collisionInfo.slopeNormal = raycastHit.normal;
@@ -265,10 +259,10 @@ public class PlatformMotor2D : RaycastMotor2D
     }
 
 
-    //Rampas
+    // Slope climbing logic
     private void ClimbSlope(ref Vector2 velocity, float slopeAngle, Vector2 slopeNormal)
     {
-        //consigue la cantidad que se va a mover
+        // Calculate movement along the slope
         float moveDistance = Mathf.Abs(velocity.x);
         float climbVelocityY = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
 
@@ -286,8 +280,7 @@ public class PlatformMotor2D : RaycastMotor2D
         collisionInfo.slopeNormal = slopeNormal;
 
     }
-
-
+    
     private void DescendSlope(ref Vector2 moveAmount)
     {
         RaycastHit2D maxSlopeHitLeft = Physics2D.Raycast(raycastOrigen.bottomLeft, Vector2.down, Mathf.Abs(moveAmount.y) + SKIN_WIDTH, collisionMask);
@@ -300,7 +293,7 @@ public class PlatformMotor2D : RaycastMotor2D
             return;
         }
 
-        //desciende normalmente por la rampa.
+        // Handle normal slope descent
         float directionX = Mathf.Sign(moveAmount.x);
         Vector2 rayOrigin = (directionX == -1) ? raycastOrigen.bottomRight : raycastOrigen.bottomLeft;
         RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
@@ -339,7 +332,11 @@ public class PlatformMotor2D : RaycastMotor2D
         collisionInfo.slopeNormal = raycastHit.normal;
     }
 
-    //Método que permite el deslize en rampas tan empinadas que no son escalables.
+    /// <summary>
+    /// Handles sliding down steep slopes that cannot be climbed based on the angle criteria.
+    /// </summary>
+    /// <param name="hit"></param>
+    /// <param name="MoveAmount"></param>
     private void SlideDownMaxSlope(RaycastHit2D hit, ref Vector2 MoveAmount)
     {
         if (!hit)
@@ -348,8 +345,8 @@ public class PlatformMotor2D : RaycastMotor2D
         }
 
         float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-        bool isDeslizable = (slopeAngle > maxSlopeAngle);
-        if(!isDeslizable)
+        bool isTooSteep = (slopeAngle > maxSlopeAngle);
+        if(!isTooSteep)
         {
             return;
         }

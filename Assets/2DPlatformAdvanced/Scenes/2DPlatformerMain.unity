@@ -4011,6 +4011,21 @@ PrefabInstance:
       propertyPath: m_CompositePaths.m_Paths.Array.data[2].Array.data[13].y
       value: -3.0000293
       objectReference: {fileID: 0}
+    - target: {fileID: 212948915013389726, guid: cefdc9cb5c29254498f8928fb68d283c,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.12941177
+      objectReference: {fileID: 0}
+    - target: {fileID: 212948915013389726, guid: cefdc9cb5c29254498f8928fb68d283c,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.10588236
+      objectReference: {fileID: 0}
+    - target: {fileID: 212948915013389726, guid: cefdc9cb5c29254498f8928fb68d283c,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.12941177
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cefdc9cb5c29254498f8928fb68d283c, type: 3}
 --- !u!4 &1663355765 stripped
@@ -4801,7 +4816,7 @@ PrefabInstance:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0.20167992
+      value: 0.2198472
       objectReference: {fileID: 0}
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 3}
@@ -4811,7 +4826,7 @@ PrefabInstance:
     - target: {fileID: 20134372339604138, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 0.59664017
+      value: 0.5603056
       objectReference: {fileID: 0}
     - target: {fileID: 114099784398422650, guid: 0f387d2a5577afa47b4f87e4e846f091,
         type: 3}
