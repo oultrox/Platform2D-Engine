@@ -102,7 +102,8 @@ public class RaycastMotor2D : MonoBehaviour
 That is either used for the player... 
 
 ```csharp
-// Components
+    // ... bla bla bla
+    // Components
     private PlatformMotor2D playerMotor;
     private PlayerInput playerInput;
     private Animator animator;
@@ -149,6 +150,7 @@ That is either used for the player...
 
 Or for movable platforms! 
 ```csharp 
+    // ... bla bla bla
     private List<PassengerState> passengers;
     private Dictionary<Transform, PlatformMotor2D> dictionaryPassengers;
     private HashSet<Transform> movedPassengers;
