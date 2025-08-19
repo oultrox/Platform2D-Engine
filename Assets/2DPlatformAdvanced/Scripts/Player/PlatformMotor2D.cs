@@ -1,9 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// Engine motor for movement related entities.
+/// </summary>
 public class PlatformMotor2D : RaycastMotor2D
 {
-    // Stores collision state information of the object.
+    /// <summary>
+    /// Stores collision state information of the object.
+    /// </summary>
     public struct CollisionInfo
     {
         // Track collisions around the player using raycasts.
@@ -61,7 +66,6 @@ public class PlatformMotor2D : RaycastMotor2D
 
     public void Move(Vector2 moveAmount, float input, bool standingOnPlatform = false)
     {
-        // Update and reset each frame.
         UpdateRaycastOrigins();
         collisionInfo.Reset();
         collisionInfo.velocityOld = moveAmount;
@@ -257,9 +261,7 @@ public class PlatformMotor2D : RaycastMotor2D
             collisionInfo.slopeNormal = raycastHit.normal;
         }
     }
-
-
-    // Slope climbing logic
+    
     private void ClimbSlope(ref Vector2 velocity, float slopeAngle, Vector2 slopeNormal)
     {
         // Calculate movement along the slope

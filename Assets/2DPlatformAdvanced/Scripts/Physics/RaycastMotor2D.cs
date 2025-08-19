@@ -4,27 +4,24 @@
 /// Physics motor based on raycasts. Used to extend either our player controllers or movable objects in the game.
 /// </summary>
 [RequireComponent(typeof(BoxCollider2D))]
-public class RaycastMotor2D : MonoBehaviour {
-
-    // Helps define the edges of the raycast origin based on the collider.
+public class RaycastMotor2D : MonoBehaviour 
+{
+    /// <summary>
+    /// Helps define the edges of the raycast origin based on the collider.
+    /// </summary>
     protected struct RaycastOrigin
     {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
     }
-
-    // Editable variables via Inspector
+    
     public LayerMask collisionMask;
-
-    // Inherited constants
     protected const float SKIN_WIDTH = 0.015f;
     protected const float DISTANCE_BETWEEN_RAYS = 0.1f;
-
     protected int horizontalRayCount;
     protected int verticalRayCount;
     protected float horizontalRaySpacing;
     protected float verticalRaySpacing;
-
     protected BoxCollider2D colliderObj;
     protected RaycastOrigin raycastOrigin;
     private Bounds _bounds;
@@ -35,7 +32,9 @@ public class RaycastMotor2D : MonoBehaviour {
         CalculateRaySpacing();
     }
 
-    // Updates the positions of the raycast origins based on the collider size.
+    /// <summary>
+    /// Updates the positions of the raycast origins based on the collider size.
+    /// </summary>
     protected void UpdateRaycastOrigins()
     {
         _bounds = colliderObj.bounds;
@@ -54,7 +53,9 @@ public class RaycastMotor2D : MonoBehaviour {
         raycastOrigin.topRight.y = _bounds.max.y;
     }
 
-    // Calculates the spacing between raycast lines. Done only once.
+    /// <summary>
+    /// Calculates the spacing between raycast lines. Done only once.
+    /// </summary>
     private void CalculateRaySpacing()
     {
         _bounds = colliderObj.bounds;

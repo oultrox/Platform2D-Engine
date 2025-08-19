@@ -45,11 +45,9 @@ public class PlayerMovementController : MonoBehaviour
 
     private void Start()
     {
-        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
-        maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
-        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
+        SetGravity();
     }
-
+    
     private void Update()
     {
         HandleMovement();
@@ -65,6 +63,13 @@ public class PlayerMovementController : MonoBehaviour
         playerInput.ConsumeJumpInputs();
     }
 
+    private void SetGravity()
+    {
+        gravity = -(2 * maxJumpHeight) / Mathf.Pow(timeToJumpApex, 2);
+        maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
+        minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
+    }
+    
     private void HandleMovement()
     {
         float horizontalInput = playerInput.MoveInput.x;
