@@ -22,7 +22,6 @@ A 2D platforming engine built in Unity3D, using **raycasting** for collision det
 
 ### Component Highlights
 ```csharp
-// Example: Raycast-based 2D motor
 using UnityEngine;
 
 /// <summary>
