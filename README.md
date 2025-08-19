@@ -172,7 +172,7 @@ Or for movable platforms!
         UpdateRaycastOrigins();
         Vector3 velocity = CalculatePlatformMovement();
         CalculatePassengerMovement(velocity);
-        DisplacePassengers(velocity);
+        DisplaceWithPassengers(velocity);
     }
     
     private void SetWayPoints()
