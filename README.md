@@ -161,6 +161,7 @@ Or for movable platforms!
     private float percentBetweenWaypoints;
     private float nextMoveTime;
 
+    
     public override void Start()
     {
         SetWayPoints();
@@ -171,9 +172,7 @@ Or for movable platforms!
         UpdateRaycastOrigins();
         Vector3 velocity = CalculatePlatformMovement();
         CalculatePassengerMovement(velocity);
-        MovePassenger(true);
-        transform.Translate(velocity);
-        MovePassenger(false);
+        DisplacePassengers(velocity);
     }
     
     private void SetWayPoints()
@@ -189,11 +188,45 @@ Or for movable platforms!
             globalWayPointsPosition[i] = localWaypoints[i] + transform.position;
         }
     }
-
+    
     private float Ease(float x)
     {
         float a = easeAmount + 1;
         return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
+    }
+
+    private Vector3 CalculatePlatformMovement()
+    {
+        if (Time.time < nextMoveTime)
+        {
+            return Vector3.zero;
+        }
+
+        fromWayPointIndex = fromWayPointIndex % globalWayPointsPosition.Length;
+        int toWayPointIndex = (fromWayPointIndex + 1) % globalWayPointsPosition.Length;
+
+        float distanceBetweenWayPoints = Vector3.Distance(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex]);
+        percentBetweenWaypoints += Time.deltaTime * speed / distanceBetweenWayPoints;
+        percentBetweenWaypoints = Mathf.Clamp01(percentBetweenWaypoints);
+
+        float easedPercentBetweenWayPoints = Ease(percentBetweenWaypoints);
+        Vector3 newPos = Vector3.Lerp(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex], easedPercentBetweenWayPoints);
+
+        if (percentBetweenWaypoints >= 1)
+        {
+            percentBetweenWaypoints = 0;
+            fromWayPointIndex++;
+
+            if (!isCyclic && fromWayPointIndex >= globalWayPointsPosition.Length - 1)
+            {
+                fromWayPointIndex = 0;
+                System.Array.Reverse(globalWayPointsPosition);
+            }
+
+            nextMoveTime = Time.time + waitTime;
+        }
+
+        return newPos - transform.position;
     }
     bla bla bla...
 ```
