@@ -49,9 +49,7 @@ public class MovingPlatformController : RaycastMotor2D
         UpdateRaycastOrigins();
         Vector3 velocity = CalculatePlatformMovement();
         CalculatePassengerMovement(velocity);
-        MovePassenger(true);
-        transform.Translate(velocity);
-        MovePassenger(false);
+        DisplaceWithPassengers(velocity);
     }
     
     private void SetWayPoints()
@@ -67,7 +65,7 @@ public class MovingPlatformController : RaycastMotor2D
             globalWayPointsPosition[i] = localWaypoints[i] + transform.position;
         }
     }
-
+    
     private float Ease(float x)
     {
         float a = easeAmount + 1;
@@ -108,6 +106,13 @@ public class MovingPlatformController : RaycastMotor2D
         return newPos - transform.position;
     }
 
+    private void DisplaceWithPassengers(Vector3 velocity)
+    {
+        MovePassenger(true);
+        transform.Translate(velocity);
+        MovePassenger(false);
+    }
+    
     private void MovePassenger(bool beforeMovePlatform)
     {
         for (int i = 0; i < passengers.Count; i++)
