@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingPlatformController : RaycastMotor2D {
-
+/// <summary>
+/// In charge of movable platforms using the Raycast Motor for movement translations.
+/// </summary>
+public class MovingPlatformController : RaycastMotor2D 
+{
     private struct PassengerState
     {
         public Transform transform;
@@ -18,8 +21,7 @@ public class MovingPlatformController : RaycastMotor2D {
             isMovingBeforePlatform = _isMovingBeforePlatform;
         }
     }
-
-    // Editable fields
+    
     public LayerMask passengerMask;
     public Vector3[] localWaypoints;
     [Range(0, 2)]
@@ -36,9 +38,10 @@ public class MovingPlatformController : RaycastMotor2D {
     private float percentBetweenWaypoints;
     private float nextMoveTime;
 
+    
     public override void Start()
     {
-        SetLWayPoints();
+        SetWayPoints();
     }
     
     void Update()
@@ -51,7 +54,7 @@ public class MovingPlatformController : RaycastMotor2D {
         MovePassenger(false);
     }
     
-    private void SetLWayPoints()
+    private void SetWayPoints()
     {
         base.Start();
         dictionaryPassengers = new Dictionary<Transform, PlatformMotor2D>();

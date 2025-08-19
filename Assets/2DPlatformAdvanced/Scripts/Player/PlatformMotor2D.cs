@@ -25,9 +25,8 @@ public class PlatformMotor2D : RaycastMotor2D
         public bool isSlidingDownMaxSlope;
         public float slopeAngle, slopeAngleOld;
 
-        // Direction the player is facing based on movement
+        // Velocities
         public int faceDir;
-
         public Vector2 velocityOld;
         public Vector2 slopeNormal;
         public Collider2D platformStanding;
