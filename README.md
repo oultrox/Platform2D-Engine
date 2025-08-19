@@ -146,6 +146,7 @@ That is either used for the player...
         maxJumpVelocity = Mathf.Abs(gravity * timeToJumpApex);
         minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
     }
+
     bla bla bla...
 ``` 
 
@@ -204,15 +205,12 @@ Or for movable platforms!
         fromWayPointIndex = fromWayPointIndex % globalWayPointsPosition.Length;
         int toWayPointIndex = (fromWayPointIndex + 1) % globalWayPointsPosition.Length;
 
-        float distanceBetweenWayPoints = Vector3.Distance(globalWayPointsPosition[fromWayPointIndex],
-                                         globalWayPointsPosition[toWayPointIndex]);
-
+        float distanceBetweenWayPoints = Vector3.Distance(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex]);
         percentBetweenWaypoints += Time.deltaTime * speed / distanceBetweenWayPoints;
         percentBetweenWaypoints = Mathf.Clamp01(percentBetweenWaypoints);
 
         float easedPercentBetweenWayPoints = Ease(percentBetweenWaypoints);
-        Vector3 newPos = Vector3.Lerp(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex],
-                         easedPercentBetweenWayPoints);
+        Vector3 newPos = Vector3.Lerp(globalWayPointsPosition[fromWayPointIndex], globalWayPointsPosition[toWayPointIndex], easedPercentBetweenWayPoints);
 
         if (percentBetweenWaypoints >= 1)
         {
