@@ -164,6 +164,7 @@ Or for movable platforms!
     
     public override void Start()
     {
+        base.Start();
         SetWayPoints();
     }
     
@@ -177,7 +178,6 @@ Or for movable platforms!
     
     private void SetWayPoints()
     {
-        base.Start();
         dictionaryPassengers = new Dictionary<Transform, PlatformMotor2D>();
         globalWayPointsPosition = new Vector3[localWaypoints.Length];
         passengers = new List<PassengerState>();
