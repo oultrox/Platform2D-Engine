@@ -41,6 +41,7 @@ public class MovingPlatformController : RaycastMotor2D
     
     public override void Start()
     {
+        base.Start();
         SetWayPoints();
     }
     
@@ -54,7 +55,6 @@ public class MovingPlatformController : RaycastMotor2D
     
     private void SetWayPoints()
     {
-        base.Start();
         dictionaryPassengers = new Dictionary<Transform, PlatformMotor2D>();
         globalWayPointsPosition = new Vector3[localWaypoints.Length];
         passengers = new List<PassengerState>();
