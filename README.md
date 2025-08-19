@@ -195,6 +195,7 @@ Or for movable platforms!
         float a = easeAmount + 1;
         return Mathf.Pow(x, a) / (Mathf.Pow(x, a) + Mathf.Pow(1 - x, a));
     }
+    bla bla bla...
 ```
 
 ### Future Improvements
