@@ -98,7 +98,7 @@ private List<PassengerState> passengers;
 
     public override void Start()
     {
-        SetLWayPoints();
+        SetWayPoints();
     }
     
     void Update()
@@ -111,7 +111,7 @@ private List<PassengerState> passengers;
         MovePassenger(false);
     }
     
-    private void SetLWayPoints()
+    private void SetWayPoints()
     {
         base.Start();
         dictionaryPassengers = new Dictionary<Transform, PlatformMotor2D>();
