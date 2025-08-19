@@ -62,8 +62,9 @@ public class RaycastMotor2D : MonoBehaviour
     /// </summary>
     protected void UpdateRaycastOrigins()
     {
+        // Shrinks bounds slightly to inset raycasts and prevent bugs.
         _bounds = colliderObj.bounds;
-        _bounds.Expand(SKIN_WIDTH * -2); // Shrinks bounds slightly to inset raycasts and prevent bugs.
+        _bounds.Expand(SKIN_WIDTH * -2); 
 
         raycastOrigin.bottomLeft.x = _bounds.min.x;
         raycastOrigin.bottomLeft.y = _bounds.min.y;
