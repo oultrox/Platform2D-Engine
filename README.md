@@ -25,7 +25,8 @@ A 2D platforming engine built in Unity3D, using **raycasting** for collision det
 using UnityEngine;
 
 /// <summary>
-/// Physics motor based on raycasts. Used to extend either our player controllers or movable objects in the game.
+/// Physics motor based on raycasts. Used to extend either our player controllers
+/// or movable objects in the game.
 /// </summary>
 [RequireComponent(typeof(BoxCollider2D))]
 public class RaycastMotor2D : MonoBehaviour 
