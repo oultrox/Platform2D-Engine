@@ -2,30 +2,17 @@
 using UnityEngine;
 
 /// <summary>
-/// Engine motor for movement related entities.
+/// Engine motor for movement-related entities.
 /// </summary>
 public class PlatformMotor2D : RaycastMotor2D
 {
-    /// <summary>
-    /// Stores collision state information of the object.
-    /// </summary>
     public struct CollisionInfo
     {
-        // Track collisions around the player using raycasts.
         public bool above, below;
         public bool left, right;
-
-        // Wall jump support
-        public bool isAbleToWallJump;
-        public bool isStickedToWall;
-
-        // Slopes
-        public bool isClimbingSlope;
-        public bool isDescendingSlope;
-        public bool isSlidingDownMaxSlope;
+        public bool isAbleToWallJump, isStickedToWall;
+        public bool isClimbingSlope, isDescendingSlope, isSlidingDownMaxSlope;
         public float slopeAngle, slopeAngleOld;
-
-        // Velocities
         public int faceDir;
         public Vector2 velocityOld;
         public Vector2 slopeNormal;
@@ -33,69 +20,50 @@ public class PlatformMotor2D : RaycastMotor2D
 
         public void Reset()
         {
-            above = below = false;
-            left = right = false;
-
-            isClimbingSlope = false;
-            isDescendingSlope = false;
-            isSlidingDownMaxSlope = false;
+            above = below = left = right = false;
+            isClimbingSlope = isDescendingSlope = isSlidingDownMaxSlope = false;
             isAbleToWallJump = false;
-
             slopeAngleOld = slopeAngle;
-            slopeAngle = 0f;
+            slopeAngle = 0;
             slopeNormal = Vector2.zero;
         }
     }
-    
+
     public float maxSlopeAngle = 80;
     public CollisionInfo collisionInfo;
     private float playerVerticalInput;
-    
-    
-    public override void Start()
+    private LayerMask collisionMask;
+    private Transform _transform;
+
+    public PlatformMotor2D(Transform transform, BoxCollider2D collider, LayerMask collisionMask) : base(collider)
     {
-        base.Start();
+        _transform = transform;
         collisionInfo.faceDir = 1;
-    }
-    
-    public void Move(Vector2 moveAmount, bool standingOnPlatform = false)
-    {
-        Move(moveAmount, 0f, standingOnPlatform);
+        this.collisionMask = collisionMask;
     }
 
-    public void Move(Vector2 moveAmount, float input, bool standingOnPlatform = false)
+    public void Move(Vector2 moveAmount, float input = 0, bool standingOnPlatform = false)
     {
         UpdateRaycastOrigins();
         collisionInfo.Reset();
         collisionInfo.velocityOld = moveAmount;
-
-        // Used for passing through platforms.
         playerVerticalInput = input;
 
-        if (moveAmount.y < 0)
-        {
-            DescendSlope(ref moveAmount);
-        }
-
-        if (moveAmount.x != 0)
-        {
-            collisionInfo.faceDir = (int)Mathf.Sign(moveAmount.x);
-        }
+        if (moveAmount.y < 0) DescendSlope(ref moveAmount);
+        if (moveAmount.x != 0) collisionInfo.faceDir = (int)Mathf.Sign(moveAmount.x);
 
         CheckHorizontalCollisions(ref moveAmount);
+        if (moveAmount.y != 0) CheckVerticalCollisions(ref moveAmount);
 
-        if (moveAmount.y != 0)
-        {
-            CheckVerticalCollisions(ref moveAmount);
-        }
+        _transform.Translate(moveAmount);
 
-        transform.Translate(moveAmount);
+        if (standingOnPlatform) collisionInfo.below = true;
+    }
 
-        // Marks the object as standing on a platform if specified.
-        if (standingOnPlatform)
-        {
-            collisionInfo.below = true;
-        }
+    
+    public void Move(Vector2 moveAmount, bool standingOnPlatform = false)
+    {
+        Move(moveAmount, 0f, standingOnPlatform);
     }
 
     /// <summary>
@@ -113,10 +81,10 @@ public class PlatformMotor2D : RaycastMotor2D
         }
 
         // Similar system to vertical checks, but adapted for slope handling.
-        for (int i = 0; i < horizontalRayCount; i++)
+        for (int i = 0; i < HorizontalRayCount; i++)
         {
             Vector2 rayOrigin = (directionX == -1) ? raycastOrigin.bottomLeft : raycastOrigin.bottomRight;
-            rayOrigin += Vector2.up * (horizontalRaySpacing * i);
+            rayOrigin += Vector2.up * (HorizontalRaySpacing * i);
             RaycastHit2D raycastHit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, collisionMask);
             Debug.DrawRay(rayOrigin, Vector2.right * directionX, Color.red);
 
@@ -188,10 +156,10 @@ public class PlatformMotor2D : RaycastMotor2D
         RaycastHit2D raycastHit;
 
         // Cast vertical rays to detect collisions above/below.
-        for (int i = 0; i < verticalRayCount; i++)
+        for (int i = 0; i < VerticalRayCount; i++)
         {
             rayOrigin = (directionY == -1) ? raycastOrigin.bottomLeft : raycastOrigin.topLeft;
-            rayOrigin += Vector2.right * (verticalRaySpacing * i + moveAmount.x);
+            rayOrigin += Vector2.right * (VerticalRaySpacing * i + moveAmount.x);
 
             raycastHit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, collisionMask);
 

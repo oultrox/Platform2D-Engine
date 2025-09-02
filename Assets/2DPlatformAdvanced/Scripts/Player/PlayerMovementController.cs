@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(PlatformMotor2D))]
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerMovementController : MonoBehaviour
 {
@@ -11,7 +10,8 @@ public class PlayerMovementController : MonoBehaviour
     public float moveSpeed = 6;
     public float accelerationOnGround = 0.03f;
     public float accelerationOnAir = 0.1f;
-
+    public LayerMask collisionMask;
+    
     [Header("Wall Settings")]
     public float wallsSlideSpeedMax = 3;
     public float wallStickTime = 0.25f;
@@ -34,13 +34,16 @@ public class PlayerMovementController : MonoBehaviour
     private PlayerInput playerInput;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-
+    public PlatformMotor2D PlayerMotor => playerMotor;
+    
+    
     private void Awake()
     {
+        var box = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        playerMotor = GetComponent<PlatformMotor2D>();
         playerInput = GetComponent<PlayerInput>();
+        playerMotor = new PlatformMotor2D(transform, box, collisionMask);
     }
 
     private void Start()
