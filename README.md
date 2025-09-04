@@ -22,81 +22,65 @@ A 2D platforming engine built in Unity3D, using **raycasting** for collision det
 
 ### Component Highlights
 ```csharp
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Physics motor based on raycasts. Used to extend either our player controllers
-/// or movable objects in the game.
+/// Handles raycast-based physics.
 /// </summary>
-[RequireComponent(typeof(BoxCollider2D))]
-public class RaycastMotor2D : MonoBehaviour 
+public class RaycastMotor2D
 {
-    /// <summary>
-    /// Helps define the edges of the raycast origin based on the collider.
-    /// </summary>
+    public const float SKIN_WIDTH = 0.015f;
+    public const float DISTANCE_BETWEEN_RAYS = 0.1f;
+    protected BoxCollider2D collider;
+    protected Bounds bounds;
+    protected RaycastOrigin raycastOrigin;
+    
+    public int HorizontalRayCount { get; private set; }
+    public int VerticalRayCount { get; private set; }
+    public float HorizontalRaySpacing { get; private set; }
+    public float VerticalRaySpacing { get; private set; }
+    public Bounds GetBounds() => bounds;
+    public Vector2 GetBottomLeft() => raycastOrigin.bottomLeft;
+    public Vector2 GetBottomRight() => raycastOrigin.bottomRight;
+    public Vector2 GetTopLeft() => raycastOrigin.topLeft;
+    public Vector2 GetTopRight() => raycastOrigin.topRight;
+    
     protected struct RaycastOrigin
     {
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
     }
+
     
-    public LayerMask collisionMask;
-    protected const float SKIN_WIDTH = 0.015f;
-    protected const float DISTANCE_BETWEEN_RAYS = 0.1f;
-    protected int horizontalRayCount;
-    protected int verticalRayCount;
-    protected float horizontalRaySpacing;
-    protected float verticalRaySpacing;
-    protected BoxCollider2D colliderObj;
-    protected RaycastOrigin raycastOrigin;
-    private Bounds _bounds;
-
-    public virtual void Start()
+    public RaycastMotor2D(BoxCollider2D collider)
     {
-        colliderObj = this.GetComponent<BoxCollider2D>();
+        this.collider = collider;
         CalculateRaySpacing();
+        UpdateRaycastOrigins();
     }
 
-    /// <summary>
-    /// Updates the positions of the raycast origins based on the collider size.
-    /// </summary>
-    protected void UpdateRaycastOrigins()
+    public void UpdateRaycastOrigins()
     {
-        // Shrinks bounds slightly to inset raycasts and prevent bugs.
-        _bounds = colliderObj.bounds;
-        _bounds.Expand(SKIN_WIDTH * -2); 
+        bounds = collider.bounds;
+        bounds.Expand(SKIN_WIDTH * -2);
 
-        raycastOrigin.bottomLeft.x = _bounds.min.x;
-        raycastOrigin.bottomLeft.y = _bounds.min.y;
-
-        raycastOrigin.bottomRight.x = _bounds.max.x;
-        raycastOrigin.bottomRight.y = _bounds.min.y;
-
-        raycastOrigin.topLeft.x = _bounds.min.x;
-        raycastOrigin.topLeft.y = _bounds.max.y;
-
-        raycastOrigin.topRight.x = _bounds.max.x;
-        raycastOrigin.topRight.y = _bounds.max.y;
+        raycastOrigin.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
+        raycastOrigin.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
+        raycastOrigin.topLeft = new Vector2(bounds.min.x, bounds.max.y);
+        raycastOrigin.topRight = new Vector2(bounds.max.x, bounds.max.y);
     }
 
-    /// <summary>
-    /// Calculates the spacing between raycast lines. Done only once.
-    /// </summary>
-    private void CalculateRaySpacing()
+    void CalculateRaySpacing()
     {
-        _bounds = colliderObj.bounds;
-        _bounds.Expand(SKIN_WIDTH * -2); 
+        bounds = collider.bounds;
+        bounds.Expand(SKIN_WIDTH * -2);
 
-        // Get the width and height of the collider.
-        float boundsWidth = _bounds.size.x;
-        float boundsHeight = _bounds.size.y;
+        HorizontalRayCount = Mathf.RoundToInt(bounds.size.y / DISTANCE_BETWEEN_RAYS);
+        VerticalRayCount = Mathf.RoundToInt(bounds.size.x / DISTANCE_BETWEEN_RAYS);
 
-        // Set the number of rays to cast based on the spacing along the opposite side.
-        horizontalRayCount = Mathf.RoundToInt(boundsHeight / DISTANCE_BETWEEN_RAYS);
-        verticalRayCount = Mathf.RoundToInt(boundsWidth / DISTANCE_BETWEEN_RAYS);
-
-        horizontalRaySpacing = _bounds.size.y / (horizontalRayCount - 1);
-        verticalRaySpacing = _bounds.size.x / (verticalRayCount - 1);
+        HorizontalRaySpacing = bounds.size.y / (HorizontalRayCount - 1);
+        VerticalRaySpacing = bounds.size.x / (VerticalRayCount - 1);
     }
 }
 ```
